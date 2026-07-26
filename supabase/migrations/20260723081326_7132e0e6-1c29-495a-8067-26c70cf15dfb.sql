@@ -1,0 +1,2 @@
+
+REVOKE EXECUTE ON FUNCTION public.handle_new_user_game_progress() FROM PUBLIC, anon, authenticated;

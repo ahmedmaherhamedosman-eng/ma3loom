@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "HTML quiz files publicly readable" ON storage.objects;
