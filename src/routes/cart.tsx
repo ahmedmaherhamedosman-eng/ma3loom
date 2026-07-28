@@ -22,6 +22,10 @@ interface CartCourseExt {
   is_free: boolean;
 }
 
+interface CartCourseExtRow extends CartCourseExt {
+  id: string;
+}
+
 function CartPage() {
   const { items, count, total, loading, removeFromCart, clearCart, refresh } = useCart();
   const navigate = useNavigate();
@@ -50,7 +54,7 @@ function CartPage() {
       .in("id", courseIds)
       .then(({ data }) => {
         const map: Record<string, CartCourseExt> = {};
-        data?.forEach((c: any) => {
+        (data as CartCourseExtRow[] | null)?.forEach((c) => {
           map[c.id] = { is_free: c.is_free };
         });
         setExtras(map);

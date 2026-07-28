@@ -1,14 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
-    const redirect = typeof search.redirect === "string" ? search.redirect : undefined;
+    const redirect = typeof search.redirect === "string" && search.redirect.startsWith("/")
+      ? search.redirect
+      : undefined;
     return redirect ? { redirect } : {};
   },
   head: () => ({
@@ -32,12 +33,39 @@ async function isProfileComplete(userId: string): Promise<boolean> {
 function LoginPage() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
-  const redirectTo = redirect || "/profile";
+  const redirectTo = redirect && redirect !== "/login" ? redirect : "/profile";
+  const goToRedirect = useCallback(() => {
+    window.location.assign(redirectTo);
+  }, [redirectTo]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+
+      if (!mounted || !user) return;
+
+      if (!(await isProfileComplete(user.id))) {
+        navigate({ to: "/complete-profile" });
+        return;
+      }
+
+      goToRedirect();
+    };
+
+    void checkExistingSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate, goToRedirect]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -59,29 +87,30 @@ function LoginPage() {
       return;
     }
 
-    navigate({ to: redirectTo as any });
+    goToRedirect();
   };
 
   const handleGoogle = async () => {
     setError("");
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/complete-profile`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/login?redirect=${encodeURIComponent(redirectTo)}`,
+        queryParams: {
+          prompt: "select_account",
+        },
+      },
     });
-    if (result.error) {
+
+    if (error) {
       setError("فشل تسجيل الدخول بجوجل، حاول مرة أخرى");
       setGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
 
-    // Tokens received synchronously - check profile
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user && !(await isProfileComplete(user.id))) {
-      navigate({ to: "/complete-profile" });
-    } else {
-      navigate({ to: redirectTo as any });
-    }
+    // If the browser blocks redirects/popups, reset loading so user can retry.
+    setGoogleLoading(false);
   };
 
   return (

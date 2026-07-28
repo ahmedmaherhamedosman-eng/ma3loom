@@ -7,7 +7,7 @@ import { MemoryGame } from "./games/MemoryGame";
 import { DragDropGame } from "./games/DragDropGame";
 
 export function GamePlayer({ game, onComplete }: { game: PlayGame; onComplete: (r: GameResult) => void }) {
-  const c = (game.content as any) || {};
+  const c = (game.content as Record<string, unknown>) || {};
   switch (game.type) {
     case "quiz":
     case "multiple_choice":

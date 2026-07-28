@@ -22,6 +22,16 @@ interface ReviewRow {
   author_name?: string;
 }
 
+interface CourseTitleRow {
+  id: string;
+  title: string;
+}
+
+interface ProfileNameRow {
+  user_id: string;
+  full_name: string;
+}
+
 function AdminReviews() {
   const [rows, setRows] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,14 +54,14 @@ function AdminReviews() {
     const [coursesRes, profilesRes] = await Promise.all([
       courseIds.length
         ? supabase.from("courses").select("id, title").in("id", courseIds)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as CourseTitleRow[] }),
       userIds.length
         ? supabase.from("profiles").select("user_id, full_name").in("user_id", userIds)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as ProfileNameRow[] }),
     ]);
 
-    const courseMap = Object.fromEntries((coursesRes.data || []).map((c: any) => [c.id, c.title]));
-    const nameMap = Object.fromEntries((profilesRes.data || []).map((p: any) => [p.user_id, p.full_name]));
+    const courseMap = Object.fromEntries((((coursesRes.data as CourseTitleRow[] | null) || []).map((c) => [c.id, c.title])));
+    const nameMap = Object.fromEntries((((profilesRes.data as ProfileNameRow[] | null) || []).map((p) => [p.user_id, p.full_name])));
 
     setRows(
       reviews.map((r) => ({

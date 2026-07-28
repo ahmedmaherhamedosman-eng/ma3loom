@@ -9,6 +9,7 @@ export const Route = createFileRoute("/instructor")({
 
 const sidebarLinks = [
   { to: "/instructor/live", label: "حصصي المباشرة", icon: "🔴" },
+  { to: "/instructor/private-lessons", label: "إدارة الحصص", icon: "🗓️" },
 ];
 
 function InstructorLayout() {

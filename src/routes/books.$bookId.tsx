@@ -154,7 +154,7 @@ function BookDetailsPage() {
               {book.is_free ? (
                 <span className="text-xs font-bold bg-emerald-500 text-white rounded-full px-3 py-1">🆓 مجاني</span>
               ) : (
-                <span className="text-xs font-bold bg-warm text-warm-foreground rounded-full px-3 py-1">{formatPrice(book.price, (book as any).currency)}</span>
+                <span className="text-xs font-bold bg-warm text-warm-foreground rounded-full px-3 py-1">{formatPrice(book.price, book.currency)}</span>
               )}
               <span className="text-xs bg-muted text-muted-foreground rounded-full px-3 py-1">{book.education_level}</span>
             </div>
@@ -179,7 +179,7 @@ function BookDetailsPage() {
               </Button>
             ) : (
               <Button variant="hero" size="lg" onClick={handlePurchase} disabled={checkoutLoading} className="w-full sm:w-auto">
-                {checkoutLoading ? "جاري التحويل للدفع..." : `💳 شراء بـ ${formatPrice(book.price, (book as any).currency)}`}
+                {checkoutLoading ? "جاري التحويل للدفع..." : `💳 شراء بـ ${formatPrice(book.price, book.currency)}`}
               </Button>
             )}
           </div>

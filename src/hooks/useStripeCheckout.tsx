@@ -37,8 +37,9 @@ export function useStripeCheckout() {
 
       // Redirect to Stripe-hosted checkout
       window.location.href = data.url;
-    } catch (e: any) {
-      toast.error("تعذّر فتح صفحة الدفع", { description: e?.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "حدث خطأ غير متوقع";
+      toast.error("تعذّر فتح صفحة الدفع", { description: message });
       setLoading(false);
     }
   };

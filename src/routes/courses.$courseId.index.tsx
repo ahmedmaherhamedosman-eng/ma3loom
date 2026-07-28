@@ -46,6 +46,36 @@ interface Course {
   views_count: number;
 }
 
+interface LessonRow {
+  id: string;
+  title: string;
+  duration_minutes: number | null;
+  is_preview: boolean | null;
+  chapter_id: string | null;
+}
+
+interface ChapterRow {
+  id: string;
+  title: string;
+}
+
+interface ReviewRow {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user_id: string;
+}
+
+interface ProfileNameRow {
+  user_id: string;
+  full_name: string | null;
+}
+
+interface CourseCategoryLink {
+  category_id: string;
+}
+
 function getYouTubeEmbedUrl(url: string) {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
@@ -107,8 +137,8 @@ function CourseDetailPage() {
 
       if (courseRes.data) setCourse(courseRes.data as Course);
 
-      const lessonsData = (lessonsRes.data || []) as any[];
-      const chaptersData = (chaptersRes.data || []) as any[];
+      const lessonsData = (lessonsRes.data || []) as LessonRow[];
+      const chaptersData = (chaptersRes.data || []) as ChapterRow[];
       const uncat = lessonsData
         .filter((l) => !l.chapter_id)
         .map((l) => ({
@@ -128,7 +158,7 @@ function CourseDetailPage() {
       setUncategorized(uncat);
       setAllLessonIds(lessonsData.map((l) => l.id));
 
-      const revRows = (reviewsRes.data || []) as any[];
+      const revRows = (reviewsRes.data || []) as ReviewRow[];
       const authorIds = Array.from(new Set(revRows.map((r) => r.user_id)));
       let nameMap: Record<string, string> = {};
       if (authorIds.length > 0) {
@@ -136,7 +166,7 @@ function CourseDetailPage() {
           .from("profiles")
           .select("user_id, full_name")
           .in("user_id", authorIds);
-        nameMap = Object.fromEntries((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+        nameMap = Object.fromEntries((((profiles as ProfileNameRow[] | null) || []).map((p) => [p.user_id, p.full_name || "طالب"])));
       }
       setReviews(
         revRows.map((r) => ({
@@ -149,7 +179,7 @@ function CourseDetailPage() {
       );
       setAllRatings(revRows.map((r) => r.rating));
 
-      setCategoryIds((catLinksRes.data || []).map((l: any) => l.category_id));
+      setCategoryIds((((catLinksRes.data as CourseCategoryLink[] | null) || []).map((l) => l.category_id)));
 
       const { data: hqData } = await supabase
         .from("html_quizzes")
@@ -246,9 +276,10 @@ function CourseDetailPage() {
 
       // Hard navigation guarantees the lesson page mounts fresh
       window.location.href = `/courses/${courseId}/lessons/${firstLesson.id}`;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[courses/$courseId] handleEnrollFree fatal:", err);
-      toast.error("حصل خطأ غير متوقع", { description: err?.message });
+      const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
+      toast.error("حصل خطأ غير متوقع", { description: message });
     } finally {
       setEnrolling(false);
     }
@@ -273,12 +304,12 @@ function CourseDetailPage() {
       .select("id, rating, comment, created_at, user_id")
       .eq("course_id", courseId)
       .order("created_at", { ascending: false });
-    const rows = (data || []) as any[];
+    const rows = (data || []) as ReviewRow[];
     const authorIds = Array.from(new Set(rows.map((r) => r.user_id)));
     let nameMap: Record<string, string> = {};
     if (authorIds.length > 0) {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", authorIds);
-      nameMap = Object.fromEntries((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+      nameMap = Object.fromEntries((((profiles as ProfileNameRow[] | null) || []).map((p) => [p.user_id, p.full_name || "طالب"])));
     }
     setReviews(
       rows.map((r) => ({

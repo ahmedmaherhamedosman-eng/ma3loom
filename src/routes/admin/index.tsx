@@ -40,6 +40,28 @@ interface DailyPoint {
   count: number;
 }
 
+interface WeekProgressRow {
+  user_id: string;
+}
+
+interface EnrollmentRow {
+  progress_percentage: number | null;
+  course_id: string | null;
+}
+
+interface CoursePaymentRow {
+  course_id: string | null;
+}
+
+interface CourseTitleRow {
+  id: string;
+  title: string;
+}
+
+interface RecentEnrollmentRow {
+  enrolled_at: string;
+}
+
 function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     students: 0,
@@ -99,16 +121,17 @@ function AdminDashboard() {
 
       const revenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const revenueThisMonth = monthPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
-      const activeThisWeek = new Set((weekProgress || []).map((p: any) => p.user_id)).size;
+      const activeThisWeek = new Set((((weekProgress as WeekProgressRow[] | null) || []).map((p) => p.user_id))).size;
 
-      const enrollList = enrollments || [];
+      const enrollList = (enrollments as EnrollmentRow[] | null) || [];
       const avgCompletion = enrollList.length > 0
-        ? Math.round(enrollList.reduce((a: number, e: any) => a + (e.progress_percentage || 0), 0) / enrollList.length)
+        ? Math.round(enrollList.reduce((a: number, e) => a + (e.progress_percentage || 0), 0) / enrollList.length)
         : 0;
 
       // Top selling: count payments per course_id
       const sellMap: Record<string, number> = {};
-      (enrollPayments || []).forEach((p: any) => {
+      (((enrollPayments as CoursePaymentRow[] | null) || [])).forEach((p) => {
+        if (!p.course_id) return;
         sellMap[p.course_id] = (sellMap[p.course_id] || 0) + 1;
       });
       const topSellingIds = Object.entries(sellMap)
@@ -120,7 +143,7 @@ function AdminDashboard() {
           .from("courses")
           .select("id, title")
           .in("id", topSellingIds.map(([id]) => id));
-        const titleMap = Object.fromEntries((courseTitles || []).map((c: any) => [c.id, c.title]));
+        const titleMap = Object.fromEntries((((courseTitles as CourseTitleRow[] | null) || []).map((c) => [c.id, c.title])));
         topSellingList = topSellingIds.map(([id, count]) => ({
           id,
           title: titleMap[id] || "—",
@@ -135,7 +158,7 @@ function AdminDashboard() {
         const key = d.toISOString().slice(0, 10);
         dayMap[key] = 0;
       }
-      (recentEnrolls || []).forEach((e: any) => {
+      (((recentEnrolls as RecentEnrollmentRow[] | null) || [])).forEach((e) => {
         const key = e.enrolled_at.slice(0, 10);
         if (key in dayMap) dayMap[key]++;
       });

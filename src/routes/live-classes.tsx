@@ -20,6 +20,10 @@ export const Route = createFileRoute("/live-classes")({
 
 type Filter = "all" | "upcoming" | "live" | "free";
 
+interface BookingRow {
+  session_id: string;
+}
+
 function LiveClassesPage() {
   const [sessions, setSessions] = useState<LiveSessionCardData[]>([]);
   const [bookings, setBookings] = useState<Set<string>>(new Set());
@@ -41,15 +45,15 @@ function LiveClassesPage() {
       .select("*")
       .neq("status", "cancelled")
       .order("scheduled_at", { ascending: true });
-    setSessions((data as any) || []);
+    setSessions((data as LiveSessionCardData[] | null) || []);
 
     if (uid) {
       const { data: b } = await supabase
-        .from("live_session_bookings" as any)
+        .from("live_session_bookings")
         .select("session_id")
         .eq("user_id", uid)
         .eq("status", "confirmed");
-      setBookings(new Set(((b as any) || []).map((r: any) => r.session_id)));
+      setBookings(new Set(((b as BookingRow[] | null) || []).map((r) => r.session_id)));
     }
     setLoading(false);
   }, []);
@@ -79,7 +83,7 @@ function LiveClassesPage() {
     // Free session → direct booking
     setBookingLoadingId(s.id);
     const { error } = await supabase
-      .from("live_session_bookings" as any)
+      .from("live_session_bookings")
       .insert({ session_id: s.id, user_id: userId, status: "confirmed" });
     setBookingLoadingId(null);
     if (error) {
@@ -100,7 +104,7 @@ function LiveClassesPage() {
     if (!userId) return;
     if (!confirm("هل تريد إلغاء حجز هذه الحصة؟")) return;
     const { error } = await supabase
-      .from("live_session_bookings" as any)
+      .from("live_session_bookings")
       .delete()
       .eq("session_id", s.id)
       .eq("user_id", userId);

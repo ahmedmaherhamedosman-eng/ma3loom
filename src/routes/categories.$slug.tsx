@@ -5,6 +5,31 @@ import { CourseCard } from "@/components/CourseCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
+interface CourseCategoryLink {
+  course_id: string;
+}
+
+interface EnrollmentCourseRow {
+  course_id: string;
+}
+
+interface CourseCardRow {
+  id: string;
+  title: string;
+  description: string | null;
+  instructor: string;
+  category: string;
+  level: string;
+  students_count: number;
+  lessons_count: number;
+  is_free: boolean;
+  price: number;
+  currency: string | null;
+  image_url: string | null;
+  rating_avg: number | null;
+  rating_count: number | null;
+}
+
 export const Route = createFileRoute("/categories/$slug")({
   head: ({ params }) => ({
     meta: [
@@ -24,7 +49,7 @@ export const Route = createFileRoute("/categories/$slug")({
 function CategoryPage() {
   const { slug } = Route.useParams();
   const [category, setCategory] = useState<{ id: string; name: string } | null>(null);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseCardRow[]>([]);
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +72,7 @@ function CategoryPage() {
         .from("course_categories")
         .select("course_id")
         .eq("category_id", cat.id);
-      const courseIds = (links || []).map((l: any) => l.course_id);
+      const courseIds = ((links as CourseCategoryLink[] | null) || []).map((l) => l.course_id);
 
       if (courseIds.length === 0) {
         setCourses([]);
@@ -58,7 +83,7 @@ function CategoryPage() {
           .in("id", courseIds)
           .eq("is_published", true)
           .order("created_at", { ascending: false });
-        setCourses(data || []);
+        setCourses((data as CourseCardRow[] | null) || []);
       }
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -67,7 +92,7 @@ function CategoryPage() {
           .from("enrollments")
           .select("course_id")
           .eq("user_id", session.user.id);
-        setEnrolledIds(new Set((enr || []).map((e: any) => e.course_id)));
+        setEnrolledIds(new Set(((enr as EnrollmentCourseRow[] | null) || []).map((e) => e.course_id)));
       }
 
       setLoading(false);

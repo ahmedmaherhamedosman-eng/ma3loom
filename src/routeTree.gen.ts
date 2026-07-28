@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TutoringRouteImport } from './routes/tutoring'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TeachWithUsRouteImport } from './routes/teach-with-us'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivateLessonsRouteImport } from './routes/private-lessons'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MyCoursesRouteImport } from './routes/my-courses'
 import { Route as LoginRouteImport } from './routes/login'
@@ -37,9 +39,14 @@ import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as BooksIndexRouteImport } from './routes/books.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as TeachersTeacherIdRouteImport } from './routes/teachers.$teacherId'
 import { Route as QuizzesQuizIdRouteImport } from './routes/quizzes.$quizId'
+import { Route as PrivateLessonsSuccessRouteImport } from './routes/private-lessons.success'
+import { Route as PrivateLessonsCheckoutRouteImport } from './routes/private-lessons.checkout'
+import { Route as PrivateLessonsSlugRouteImport } from './routes/private-lessons.$slug'
 import { Route as PlayLeaderboardRouteImport } from './routes/play.leaderboard'
 import { Route as PlayGameIdRouteImport } from './routes/play.$gameId'
+import { Route as InstructorPrivateLessonsRouteImport } from './routes/instructor/private-lessons'
 import { Route as InstructorLiveRouteImport } from './routes/instructor.live'
 import { Route as GamesGameIdRouteImport } from './routes/games.$gameId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
@@ -47,9 +54,11 @@ import { Route as CertificatesCodeRouteImport } from './routes/certificates.$cod
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
 import { Route as BlogPostIdRouteImport } from './routes/blog.$postId'
+import { Route as AdminTeacherRequestsRouteImport } from './routes/admin/teacher-requests'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
 import { Route as AdminQuizzesRouteImport } from './routes/admin/quizzes'
+import { Route as AdminPrivateLessonsRouteImport } from './routes/admin/private-lessons'
 import { Route as AdminPostsRouteImport } from './routes/admin/posts'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminLiveRouteImport } from './routes/admin/live'
@@ -77,6 +86,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeachWithUsRoute = TeachWithUsRouteImport.update({
+  id: '/teach-with-us',
+  path: '/teach-with-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -95,6 +109,11 @@ const RefundRoute = RefundRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateLessonsRoute = PrivateLessonsRouteImport.update({
+  id: '/private-lessons',
+  path: '/private-lessons',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -207,10 +226,30 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const TeachersTeacherIdRoute = TeachersTeacherIdRouteImport.update({
+  id: '/teachers/$teacherId',
+  path: '/teachers/$teacherId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizzesQuizIdRoute = QuizzesQuizIdRouteImport.update({
   id: '/quizzes/$quizId',
   path: '/quizzes/$quizId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateLessonsSuccessRoute = PrivateLessonsSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => PrivateLessonsRoute,
+} as any)
+const PrivateLessonsCheckoutRoute = PrivateLessonsCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => PrivateLessonsRoute,
+} as any)
+const PrivateLessonsSlugRoute = PrivateLessonsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => PrivateLessonsRoute,
 } as any)
 const PlayLeaderboardRoute = PlayLeaderboardRouteImport.update({
   id: '/play/leaderboard',
@@ -222,6 +261,12 @@ const PlayGameIdRoute = PlayGameIdRouteImport.update({
   path: '/play/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstructorPrivateLessonsRoute =
+  InstructorPrivateLessonsRouteImport.update({
+    id: '/private-lessons',
+    path: '/private-lessons',
+    getParentRoute: () => InstructorRoute,
+  } as any)
 const InstructorLiveRoute = InstructorLiveRouteImport.update({
   id: '/live',
   path: '/live',
@@ -257,6 +302,11 @@ const BlogPostIdRoute = BlogPostIdRouteImport.update({
   path: '/blog/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTeacherRequestsRoute = AdminTeacherRequestsRouteImport.update({
+  id: '/teacher-requests',
+  path: '/teacher-requests',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -270,6 +320,11 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
 const AdminQuizzesRoute = AdminQuizzesRouteImport.update({
   id: '/quizzes',
   path: '/quizzes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPrivateLessonsRoute = AdminPrivateLessonsRouteImport.update({
+  id: '/private-lessons',
+  path: '/private-lessons',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPostsRoute = AdminPostsRouteImport.update({
@@ -368,10 +423,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/my-courses': typeof MyCoursesRoute
   '/privacy': typeof PrivacyRoute
+  '/private-lessons': typeof PrivateLessonsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/teach-with-us': typeof TeachWithUsRoute
   '/terms': typeof TermsRoute
   '/tutoring': typeof TutoringRoute
   '/admin/books': typeof AdminBooksRoute
@@ -385,9 +442,11 @@ export interface FileRoutesByFullPath {
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/posts': typeof AdminPostsRoute
+  '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/categories/$slug': typeof CategoriesSlugRoute
@@ -395,9 +454,14 @@ export interface FileRoutesByFullPath {
   '/courses/$courseId': typeof CoursesCourseIdRouteWithChildren
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
+  '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
+  '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
+  '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
+  '/teachers/$teacherId': typeof TeachersTeacherIdRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/books/': typeof BooksIndexRoute
@@ -426,10 +490,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/my-courses': typeof MyCoursesRoute
   '/privacy': typeof PrivacyRoute
+  '/private-lessons': typeof PrivateLessonsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/teach-with-us': typeof TeachWithUsRoute
   '/terms': typeof TermsRoute
   '/tutoring': typeof TutoringRoute
   '/admin/books': typeof AdminBooksRoute
@@ -443,18 +509,25 @@ export interface FileRoutesByTo {
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/posts': typeof AdminPostsRoute
+  '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/certificates/$code': typeof CertificatesCodeRoute
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
+  '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
+  '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
+  '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
+  '/teachers/$teacherId': typeof TeachersTeacherIdRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/books': typeof BooksIndexRoute
@@ -485,10 +558,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/my-courses': typeof MyCoursesRoute
   '/privacy': typeof PrivacyRoute
+  '/private-lessons': typeof PrivateLessonsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/teach-with-us': typeof TeachWithUsRoute
   '/terms': typeof TermsRoute
   '/tutoring': typeof TutoringRoute
   '/admin/books': typeof AdminBooksRoute
@@ -502,9 +577,11 @@ export interface FileRoutesById {
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/posts': typeof AdminPostsRoute
+  '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/categories/$slug': typeof CategoriesSlugRoute
@@ -512,9 +589,14 @@ export interface FileRoutesById {
   '/courses/$courseId': typeof CoursesCourseIdRouteWithChildren
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
+  '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
+  '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
+  '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
+  '/teachers/$teacherId': typeof TeachersTeacherIdRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/books/': typeof BooksIndexRoute
@@ -546,10 +628,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-courses'
     | '/privacy'
+    | '/private-lessons'
     | '/profile'
     | '/refund'
     | '/reset-password'
     | '/signup'
+    | '/teach-with-us'
     | '/terms'
     | '/tutoring'
     | '/admin/books'
@@ -563,9 +647,11 @@ export interface FileRouteTypes {
     | '/admin/live'
     | '/admin/payments'
     | '/admin/posts'
+    | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
+    | '/admin/teacher-requests'
     | '/blog/$postId'
     | '/books/$bookId'
     | '/categories/$slug'
@@ -573,9 +659,14 @@ export interface FileRouteTypes {
     | '/courses/$courseId'
     | '/games/$gameId'
     | '/instructor/live'
+    | '/instructor/private-lessons'
     | '/play/$gameId'
     | '/play/leaderboard'
+    | '/private-lessons/$slug'
+    | '/private-lessons/checkout'
+    | '/private-lessons/success'
     | '/quizzes/$quizId'
+    | '/teachers/$teacherId'
     | '/admin/'
     | '/blog/'
     | '/books/'
@@ -604,10 +695,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-courses'
     | '/privacy'
+    | '/private-lessons'
     | '/profile'
     | '/refund'
     | '/reset-password'
     | '/signup'
+    | '/teach-with-us'
     | '/terms'
     | '/tutoring'
     | '/admin/books'
@@ -621,18 +714,25 @@ export interface FileRouteTypes {
     | '/admin/live'
     | '/admin/payments'
     | '/admin/posts'
+    | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
+    | '/admin/teacher-requests'
     | '/blog/$postId'
     | '/books/$bookId'
     | '/categories/$slug'
     | '/certificates/$code'
     | '/games/$gameId'
     | '/instructor/live'
+    | '/instructor/private-lessons'
     | '/play/$gameId'
     | '/play/leaderboard'
+    | '/private-lessons/$slug'
+    | '/private-lessons/checkout'
+    | '/private-lessons/success'
     | '/quizzes/$quizId'
+    | '/teachers/$teacherId'
     | '/admin'
     | '/blog'
     | '/books'
@@ -662,10 +762,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/my-courses'
     | '/privacy'
+    | '/private-lessons'
     | '/profile'
     | '/refund'
     | '/reset-password'
     | '/signup'
+    | '/teach-with-us'
     | '/terms'
     | '/tutoring'
     | '/admin/books'
@@ -679,9 +781,11 @@ export interface FileRouteTypes {
     | '/admin/live'
     | '/admin/payments'
     | '/admin/posts'
+    | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
+    | '/admin/teacher-requests'
     | '/blog/$postId'
     | '/books/$bookId'
     | '/categories/$slug'
@@ -689,9 +793,14 @@ export interface FileRouteTypes {
     | '/courses/$courseId'
     | '/games/$gameId'
     | '/instructor/live'
+    | '/instructor/private-lessons'
     | '/play/$gameId'
     | '/play/leaderboard'
+    | '/private-lessons/$slug'
+    | '/private-lessons/checkout'
+    | '/private-lessons/success'
     | '/quizzes/$quizId'
+    | '/teachers/$teacherId'
     | '/admin/'
     | '/blog/'
     | '/books/'
@@ -722,10 +831,12 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MyCoursesRoute: typeof MyCoursesRoute
   PrivacyRoute: typeof PrivacyRoute
+  PrivateLessonsRoute: typeof PrivateLessonsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RefundRoute: typeof RefundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  TeachWithUsRoute: typeof TeachWithUsRoute
   TermsRoute: typeof TermsRoute
   TutoringRoute: typeof TutoringRoute
   BlogPostIdRoute: typeof BlogPostIdRoute
@@ -737,6 +848,7 @@ export interface RootRouteChildren {
   PlayGameIdRoute: typeof PlayGameIdRoute
   PlayLeaderboardRoute: typeof PlayLeaderboardRoute
   QuizzesQuizIdRoute: typeof QuizzesQuizIdRoute
+  TeachersTeacherIdRoute: typeof TeachersTeacherIdRoute
   BlogIndexRoute: typeof BlogIndexRoute
   BooksIndexRoute: typeof BooksIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
@@ -762,6 +874,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teach-with-us': {
+      id: '/teach-with-us'
+      path: '/teach-with-us'
+      fullPath: '/teach-with-us'
+      preLoaderRoute: typeof TeachWithUsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -790,6 +909,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private-lessons': {
+      id: '/private-lessons'
+      path: '/private-lessons'
+      fullPath: '/private-lessons'
+      preLoaderRoute: typeof PrivateLessonsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -946,12 +1072,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/teachers/$teacherId': {
+      id: '/teachers/$teacherId'
+      path: '/teachers/$teacherId'
+      fullPath: '/teachers/$teacherId'
+      preLoaderRoute: typeof TeachersTeacherIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quizzes/$quizId': {
       id: '/quizzes/$quizId'
       path: '/quizzes/$quizId'
       fullPath: '/quizzes/$quizId'
       preLoaderRoute: typeof QuizzesQuizIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/private-lessons/success': {
+      id: '/private-lessons/success'
+      path: '/success'
+      fullPath: '/private-lessons/success'
+      preLoaderRoute: typeof PrivateLessonsSuccessRouteImport
+      parentRoute: typeof PrivateLessonsRoute
+    }
+    '/private-lessons/checkout': {
+      id: '/private-lessons/checkout'
+      path: '/checkout'
+      fullPath: '/private-lessons/checkout'
+      preLoaderRoute: typeof PrivateLessonsCheckoutRouteImport
+      parentRoute: typeof PrivateLessonsRoute
+    }
+    '/private-lessons/$slug': {
+      id: '/private-lessons/$slug'
+      path: '/$slug'
+      fullPath: '/private-lessons/$slug'
+      preLoaderRoute: typeof PrivateLessonsSlugRouteImport
+      parentRoute: typeof PrivateLessonsRoute
     }
     '/play/leaderboard': {
       id: '/play/leaderboard'
@@ -966,6 +1120,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/play/$gameId'
       preLoaderRoute: typeof PlayGameIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/instructor/private-lessons': {
+      id: '/instructor/private-lessons'
+      path: '/private-lessons'
+      fullPath: '/instructor/private-lessons'
+      preLoaderRoute: typeof InstructorPrivateLessonsRouteImport
+      parentRoute: typeof InstructorRoute
     }
     '/instructor/live': {
       id: '/instructor/live'
@@ -1016,6 +1177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/teacher-requests': {
+      id: '/admin/teacher-requests'
+      path: '/teacher-requests'
+      fullPath: '/admin/teacher-requests'
+      preLoaderRoute: typeof AdminTeacherRequestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/students': {
       id: '/admin/students'
       path: '/students'
@@ -1035,6 +1203,13 @@ declare module '@tanstack/react-router' {
       path: '/quizzes'
       fullPath: '/admin/quizzes'
       preLoaderRoute: typeof AdminQuizzesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/private-lessons': {
+      id: '/admin/private-lessons'
+      path: '/private-lessons'
+      fullPath: '/admin/private-lessons'
+      preLoaderRoute: typeof AdminPrivateLessonsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/posts': {
@@ -1164,9 +1339,11 @@ interface AdminRouteChildren {
   AdminLiveRoute: typeof AdminLiveRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPostsRoute: typeof AdminPostsRoute
+  AdminPrivateLessonsRoute: typeof AdminPrivateLessonsRoute
   AdminQuizzesRoute: typeof AdminQuizzesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
+  AdminTeacherRequestsRoute: typeof AdminTeacherRequestsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLessonsCourseIdRoute: typeof AdminLessonsCourseIdRoute
 }
@@ -1183,9 +1360,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLiveRoute: AdminLiveRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPostsRoute: AdminPostsRoute,
+  AdminPrivateLessonsRoute: AdminPrivateLessonsRoute,
   AdminQuizzesRoute: AdminQuizzesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminStudentsRoute: AdminStudentsRoute,
+  AdminTeacherRequestsRoute: AdminTeacherRequestsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLessonsCourseIdRoute: AdminLessonsCourseIdRoute,
 }
@@ -1194,14 +1373,32 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface InstructorRouteChildren {
   InstructorLiveRoute: typeof InstructorLiveRoute
+  InstructorPrivateLessonsRoute: typeof InstructorPrivateLessonsRoute
 }
 
 const InstructorRouteChildren: InstructorRouteChildren = {
   InstructorLiveRoute: InstructorLiveRoute,
+  InstructorPrivateLessonsRoute: InstructorPrivateLessonsRoute,
 }
 
 const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
   InstructorRouteChildren,
+)
+
+interface PrivateLessonsRouteChildren {
+  PrivateLessonsSlugRoute: typeof PrivateLessonsSlugRoute
+  PrivateLessonsCheckoutRoute: typeof PrivateLessonsCheckoutRoute
+  PrivateLessonsSuccessRoute: typeof PrivateLessonsSuccessRoute
+}
+
+const PrivateLessonsRouteChildren: PrivateLessonsRouteChildren = {
+  PrivateLessonsSlugRoute: PrivateLessonsSlugRoute,
+  PrivateLessonsCheckoutRoute: PrivateLessonsCheckoutRoute,
+  PrivateLessonsSuccessRoute: PrivateLessonsSuccessRoute,
+}
+
+const PrivateLessonsRouteWithChildren = PrivateLessonsRoute._addFileChildren(
+  PrivateLessonsRouteChildren,
 )
 
 interface CoursesCourseIdRouteChildren {
@@ -1234,10 +1431,12 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MyCoursesRoute: MyCoursesRoute,
   PrivacyRoute: PrivacyRoute,
+  PrivateLessonsRoute: PrivateLessonsRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RefundRoute: RefundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  TeachWithUsRoute: TeachWithUsRoute,
   TermsRoute: TermsRoute,
   TutoringRoute: TutoringRoute,
   BlogPostIdRoute: BlogPostIdRoute,
@@ -1249,6 +1448,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayGameIdRoute: PlayGameIdRoute,
   PlayLeaderboardRoute: PlayLeaderboardRoute,
   QuizzesQuizIdRoute: QuizzesQuizIdRoute,
+  TeachersTeacherIdRoute: TeachersTeacherIdRoute,
   BlogIndexRoute: BlogIndexRoute,
   BooksIndexRoute: BooksIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,

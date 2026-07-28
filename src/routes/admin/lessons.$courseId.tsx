@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,7 +79,7 @@ function AdminLessons() {
   const [resourcesLessonId, setResourcesLessonId] = useState<string | null>(null);
   const [resourcesLessonTitle, setResourcesLessonTitle] = useState("");
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const [{ data: course }, { data: lessonsData }, { data: chaptersData }] = await Promise.all([
       supabase.from("courses").select("title").eq("id", courseId).single(),
       supabase.from("lessons").select("*").eq("course_id", courseId).order("sort_order"),
@@ -89,11 +89,11 @@ function AdminLessons() {
     setLessons(lessonsData || []);
     setChapters(chaptersData || []);
     setLoading(false);
-  };
+  }, [courseId]);
 
   useEffect(() => {
     loadData();
-  }, [courseId]);
+  }, [loadData]);
 
   // ---------- Chapter CRUD ----------
   const resetChapterForm = () => {

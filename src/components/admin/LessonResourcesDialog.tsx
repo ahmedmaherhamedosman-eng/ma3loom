@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export function LessonResourcesDialog({ lessonId, lessonTitle, open, onClose }: 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ title: "", file_url: "", file_type: "pdf" });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!lessonId) return;
     setLoading(true);
     const { data } = await supabase
@@ -35,11 +35,11 @@ export function LessonResourcesDialog({ lessonId, lessonTitle, open, onClose }: 
       .order("sort_order");
     setResources(data || []);
     setLoading(false);
-  };
+  }, [lessonId]);
 
   useEffect(() => {
     if (open && lessonId) load();
-  }, [open, lessonId]);
+  }, [open, lessonId, load]);
 
   const handleAdd = async () => {
     if (!lessonId || !form.title.trim() || !form.file_url.trim()) return;

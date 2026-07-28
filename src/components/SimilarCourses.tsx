@@ -7,9 +7,30 @@ interface Props {
   categoryIds: string[];
 }
 
+interface CourseCategoryLink {
+  course_id: string;
+}
+
+interface SimilarCourseItem {
+  id: string;
+  title: string;
+  description: string | null;
+  instructor: string;
+  category: string;
+  level: string;
+  students_count: number;
+  lessons_count: number;
+  price: number;
+  currency: string | null;
+  image_url: string | null;
+  rating_avg: number | null;
+  rating_count: number | null;
+}
+
 export function SimilarCourses({ courseId, categoryIds }: Props) {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<SimilarCourseItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const categoryIdsKey = categoryIds.join(",");
 
   useEffect(() => {
     const load = async () => {
@@ -20,7 +41,7 @@ export function SimilarCourses({ courseId, categoryIds }: Props) {
           .select("course_id")
           .in("category_id", categoryIds)
           .neq("course_id", courseId);
-        courseIds = Array.from(new Set((links || []).map((l: any) => l.course_id)));
+        courseIds = Array.from(new Set(((links as CourseCategoryLink[] | null) || []).map((l) => l.course_id)));
       }
 
       let query = supabase
@@ -38,11 +59,11 @@ export function SimilarCourses({ courseId, categoryIds }: Props) {
       }
 
       const { data } = await query;
-      setItems(data || []);
+      setItems((data as SimilarCourseItem[] | null) || []);
       setLoading(false);
     };
     load();
-  }, [courseId, categoryIds.join(",")]);
+  }, [courseId, categoryIds, categoryIdsKey]);
 
   if (loading || items.length === 0) return null;
 

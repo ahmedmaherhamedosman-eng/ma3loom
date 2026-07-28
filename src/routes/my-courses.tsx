@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -51,6 +51,48 @@ interface EnrollmentRow {
   certificate?: { id: string; verification_code: string; issued_at: string; quiz_score: number | null } | null;
 }
 
+interface EnrollmentRaw {
+  id: string;
+  course_id: string;
+  progress_percentage: number;
+  completed: boolean;
+  last_lesson_id: string | null;
+  enrolled_at: string;
+}
+
+interface CourseRaw {
+  id: string;
+  title: string;
+  image_url: string | null;
+  instructor: string;
+  lessons_count: number;
+  is_free: boolean;
+  price: number;
+  certificate_requirement?: string;
+}
+
+interface LessonRaw {
+  id: string;
+  course_id: string;
+}
+
+interface QuizRaw {
+  id: string;
+  course_id: string;
+}
+
+interface CertificateRaw {
+  id: string;
+  course_id: string;
+  verification_code: string;
+  issued_at: string;
+  quiz_score: number | null;
+}
+
+interface QuizAttemptRaw {
+  quiz_id: string;
+}
+
 function MyCoursesPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -61,7 +103,7 @@ function MyCoursesPage() {
   const [filter, setFilter] = useState<FilterTab>("all");
   const [view, setView] = useState<ViewMode>("grid");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -81,14 +123,14 @@ function MyCoursesPage() {
     ]);
     setProfileName(profile?.full_name || session.user.email || "طالب");
 
-    const enrollmentRows = (rows || []) as any[];
+    const enrollmentRows = (rows || []) as EnrollmentRaw[];
     const courseIds = enrollmentRows.map((r) => r.course_id);
 
-    let courseMap: Record<string, CourseInfo> = {};
-    let firstLessonMap: Record<string, string> = {};
-    let quizByCourse: Record<string, string> = {};
-    let passedQuizIds = new Set<string>();
-    let certByCourse: Record<string, EnrollmentRow["certificate"]> = {};
+    const courseMap: Record<string, CourseInfo> = {};
+    const firstLessonMap: Record<string, string> = {};
+    const quizByCourse: Record<string, string> = {};
+    const passedQuizIds = new Set<string>();
+    const certByCourse: Record<string, EnrollmentRow["certificate"]> = {};
 
     if (courseIds.length > 0) {
       const [coursesRes, lessonsRes, quizzesRes, certsRes] = await Promise.all([
@@ -114,12 +156,12 @@ function MyCoursesPage() {
           .in("course_id", courseIds),
       ]);
 
-      (coursesRes.data || []).forEach((c: any) => { courseMap[c.id] = c; });
-      (lessonsRes.data || []).forEach((l: any) => {
+      (coursesRes.data as CourseRaw[] | null || []).forEach((c) => { courseMap[c.id] = c; });
+      (lessonsRes.data as LessonRaw[] | null || []).forEach((l) => {
         if (!firstLessonMap[l.course_id]) firstLessonMap[l.course_id] = l.id;
       });
-      (quizzesRes.data || []).forEach((q: any) => { quizByCourse[q.course_id] = q.id; });
-      (certsRes.data || []).forEach((c: any) => { certByCourse[c.course_id] = c; });
+      (quizzesRes.data as QuizRaw[] | null || []).forEach((q) => { quizByCourse[q.course_id] = q.id; });
+      (certsRes.data as CertificateRaw[] | null || []).forEach((c) => { certByCourse[c.course_id] = c; });
 
       const quizIds = Object.values(quizByCourse);
       if (quizIds.length > 0) {
@@ -129,7 +171,7 @@ function MyCoursesPage() {
           .eq("user_id", uid)
           .eq("passed", true)
           .in("quiz_id", quizIds);
-        (attempts || []).forEach((a: any) => passedQuizIds.add(a.quiz_id));
+        (attempts as QuizAttemptRaw[] | null || []).forEach((a) => passedQuizIds.add(a.quiz_id));
       }
     }
 
@@ -144,9 +186,9 @@ function MyCoursesPage() {
     );
     setFirstLessonByCourse(firstLessonMap);
     setLoading(false);
-  };
+  }, [navigate]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const handleIssueCertificate = async (e: EnrollmentRow) => {
     if (!e.course) return;

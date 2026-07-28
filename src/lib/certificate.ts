@@ -24,8 +24,15 @@ const formatArabicDate = (iso: string) => {
   }
 };
 
-const verifyUrl = (code: string) =>
-  `https://ma3loom.lovable.app/certificates/${code}`;
+const getBaseUrl = () => {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return import.meta.env.VITE_PUBLIC_SITE_URL || "http://localhost:5173";
+};
+
+const verifyUrl = (code: string) => `${getBaseUrl()}/certificates/${code}`;
 
 export async function generateCertificatePDF(
   data: CertificateData

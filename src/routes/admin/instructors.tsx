@@ -17,6 +17,10 @@ interface InstructorRow {
   phone: string | null;
 }
 
+interface RoleRow {
+  user_id: string;
+}
+
 function AdminInstructors() {
   const [instructors, setInstructors] = useState<InstructorRow[]>([]);
   const [email, setEmail] = useState("");
@@ -27,14 +31,14 @@ function AdminInstructors() {
     const { data: roles } = await supabase
       .from("user_roles")
       .select("user_id")
-      .eq("role", "instructor" as any);
-    const ids = (roles || []).map((r: any) => r.user_id);
+      .eq("role", "instructor");
+    const ids = (((roles as RoleRow[] | null) || []).map((r) => r.user_id));
     if (ids.length === 0) { setInstructors([]); setLoading(false); return; }
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, full_name, phone")
       .in("user_id", ids);
-    setInstructors((profiles as any) || []);
+    setInstructors((profiles as InstructorRow[] | null) || []);
     setLoading(false);
   };
 
@@ -54,7 +58,7 @@ function AdminInstructors() {
 
   const handleRemove = async (uid: string) => {
     if (!confirm("إزالة دور المدرس من هذا المستخدم؟")) return;
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "instructor" as any);
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "instructor");
     if (error) { toast.error("تعذّر الإزالة", { description: error.message }); return; }
     toast.success("تمت الإزالة");
     load();

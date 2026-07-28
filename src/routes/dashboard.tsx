@@ -42,6 +42,42 @@ interface UpcomingSession {
   instructor_name: string | null; image_url: string | null;
 }
 
+interface PrivateBooking {
+  id: string;
+  subject: string;
+  lesson_date: string | null;
+  lesson_time: string | null;
+  booking_status: string;
+  payment_status: string;
+  meeting_link: string | null;
+}
+
+interface EnrollmentRaw {
+  id: string;
+  course_id: string;
+  progress_percentage: number;
+  completed: boolean;
+  last_lesson_id: string | null;
+  enrolled_at: string;
+}
+
+interface LessonProgressRow {
+  watched_seconds: number | null;
+  last_watched_at: string | null;
+}
+
+interface LiveSessionRow {
+  id: string;
+  title: string;
+  scheduled_at: string;
+  instructor_name: string | null;
+  image_url: string | null;
+}
+
+interface BookingRow {
+  live_sessions: LiveSessionRow | null;
+}
+
 function DashboardPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -54,6 +90,7 @@ function DashboardPage() {
   const [streakDays, setStreakDays] = useState(0);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingSession[]>([]);
+  const [privateBookings, setPrivateBookings] = useState<PrivateBooking[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -68,6 +105,7 @@ function DashboardPage() {
         { count: certCount },
         { data: progress },
         { data: bookings },
+        { data: privateBookingsRes },
       ] = await Promise.all([
         supabase.from("profiles").select("full_name").eq("user_id", uid).maybeSingle(),
         supabase.from("enrollments")
@@ -79,15 +117,21 @@ function DashboardPage() {
         supabase.from("live_session_bookings")
           .select("session_id, status, live_sessions(id, title, scheduled_at, instructor_name, image_url)")
           .eq("user_id", uid).eq("status", "confirmed"),
+        supabase
+          .from("private_lesson_bookings")
+          .select("id, subject, lesson_date, lesson_time, booking_status, payment_status, meeting_link")
+          .eq("user_id", uid)
+          .order("created_at", { ascending: false })
+          .limit(6),
       ]);
 
       setProfileName(profile?.full_name || session.user.email?.split("@")[0] || "طالب");
       setCertificatesCount(certCount || 0);
 
-      const enrollmentRows = (rows || []) as any[];
+      const enrollmentRows = (rows || []) as EnrollmentRaw[];
       const courseIds = enrollmentRows.map((r) => r.course_id);
-      let courseMap: Record<string, CourseInfo> = {};
-      let firstLessonMap: Record<string, string> = {};
+      const courseMap: Record<string, CourseInfo> = {};
+      const firstLessonMap: Record<string, string> = {};
 
       if (courseIds.length > 0) {
         const [coursesRes, lessonsRes] = await Promise.all([
@@ -98,8 +142,8 @@ function DashboardPage() {
             .select("id, course_id, sort_order")
             .in("course_id", courseIds).eq("is_published", true).order("sort_order"),
         ]);
-        (coursesRes.data || []).forEach((c: any) => { courseMap[c.id] = c; });
-        (lessonsRes.data || []).forEach((l: any) => {
+        (coursesRes.data as CourseInfo[] | null || []).forEach((c) => { courseMap[c.id] = c; });
+        (lessonsRes.data as Array<{ id: string; course_id: string }> | null || []).forEach((l) => {
           if (!firstLessonMap[l.course_id]) firstLessonMap[l.course_id] = l.id;
         });
       }
@@ -108,11 +152,11 @@ function DashboardPage() {
       setFirstLessonByCourse(firstLessonMap);
 
       // Total watched + streak
-      const totalSec = (progress || []).reduce((s: number, p: any) => s + (p.watched_seconds || 0), 0);
+      const totalSec = ((progress as LessonProgressRow[] | null) || []).reduce((s: number, p) => s + (p.watched_seconds || 0), 0);
       setTotalWatchedSeconds(totalSec);
 
       const days = new Set<string>();
-      (progress || []).forEach((p: any) => {
+      (((progress as LessonProgressRow[] | null) || [])).forEach((p) => {
         if (p.last_watched_at) days.add(new Date(p.last_watched_at).toDateString());
       });
       // Calculate streak (consecutive days ending today/yesterday)
@@ -126,12 +170,13 @@ function DashboardPage() {
       setStreakDays(streak);
 
       // Upcoming live sessions
-      const upcomingSessions: UpcomingSession[] = (bookings || [])
-        .map((b: any) => b.live_sessions)
-        .filter((s: any) => s && new Date(s.scheduled_at) > new Date())
-        .sort((a: any, b: any) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+      const upcomingSessions: UpcomingSession[] = ((bookings as BookingRow[] | null) || [])
+        .map((b) => b.live_sessions)
+        .filter((s): s is LiveSessionRow => !!s && new Date(s.scheduled_at) > new Date())
+        .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
         .slice(0, 3);
       setUpcoming(upcomingSessions);
+      setPrivateBookings((privateBookingsRes as PrivateBooking[] | null) || []);
 
       // Suggested courses (not enrolled)
       const enrolledSet = new Set(courseIds);
@@ -141,7 +186,7 @@ function DashboardPage() {
         .eq("is_published", true)
         .order("students_count", { ascending: false })
         .limit(8);
-      setSuggestions(((allCourses || []) as any[]).filter((c) => !enrolledSet.has(c.id)).slice(0, 4));
+      setSuggestions((((allCourses as Suggestion[] | null) || []).filter((c) => !enrolledSet.has(c.id)).slice(0, 4)));
 
       setLoading(false);
     })();
@@ -296,6 +341,53 @@ function DashboardPage() {
                 </div>
               </section>
             )}
+
+            <section className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Target className="text-primary" size={20} />
+                  حصصي الخصوصية
+                </h2>
+                <Link to="/private-lessons" className="text-sm text-primary font-semibold hover:underline flex items-center gap-1">
+                  طلب حصة جديدة <ArrowLeft size={14} />
+                </Link>
+              </div>
+
+              {privateBookings.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+                  لا توجد حجوزات خاصة بعد. ابدأ الآن باختيار الباقة المناسبة.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {privateBookings.map((booking) => (
+                    <div key={booking.id} className="rounded-xl border border-border p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-semibold text-foreground">{booking.subject}</p>
+                        <span className="text-xs rounded-full bg-primary/10 text-primary px-2 py-1">
+                          {booking.booking_status === "confirmed" ? "قادمة" : booking.booking_status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {booking.lesson_date || "-"} {booking.lesson_time || ""}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {booking.meeting_link ? (
+                          <a href={booking.meeting_link} target="_blank" rel="noreferrer">
+                            <Button size="sm">الانضمام للحصة</Button>
+                          </a>
+                        ) : (
+                          <Button size="sm" variant="outline" disabled>رابط الحصة سيظهر قريباً</Button>
+                        )}
+                        <Button size="sm" variant="outline">إعادة جدولة</Button>
+                        <Button size="sm" variant="outline">إلغاء الحصة</Button>
+                        <Button size="sm" variant="outline">الواجبات</Button>
+                        <Button size="sm" variant="outline">التقييم</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* Suggestions */}
             {suggestions.length > 0 && (

@@ -31,6 +31,40 @@ interface LiveSession {
   join_window_minutes: number;
 }
 
+interface LiveSessionBooking {
+  id: string;
+  user_id: string;
+  status: string;
+  joined_at: string | null;
+  created_at: string;
+}
+
+interface BookingProfile {
+  user_id: string;
+  full_name: string | null;
+  phone: string | null;
+}
+
+interface BookingWithProfile extends LiveSessionBooking {
+  profile?: BookingProfile;
+}
+
+interface LiveSessionPayload {
+  title: string;
+  description: string | null;
+  scheduled_at: string;
+  duration_minutes: number;
+  meeting_link: string | null;
+  platform: string;
+  status: string;
+  is_free: boolean;
+  price: number;
+  max_seats: number | null;
+  join_window_minutes: number;
+  instructor_id: string;
+  instructor_name: string;
+}
+
 const initialForm = {
   title: "",
   description: "",
@@ -54,7 +88,7 @@ function InstructorLivePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [instructorName, setInstructorName] = useState<string>("");
   const [viewBookingsFor, setViewBookingsFor] = useState<string | null>(null);
-  const [bookingsList, setBookingsList] = useState<any[]>([]);
+  const [bookingsList, setBookingsList] = useState<BookingWithProfile[]>([]);
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -71,7 +105,7 @@ function InstructorLivePage() {
       .select("*")
       .eq("instructor_id", uid)
       .order("scheduled_at", { ascending: false });
-    setSessions((data as any) || []);
+    setSessions((data as LiveSession[] | null) || []);
     setLoading(false);
   };
 
@@ -106,7 +140,7 @@ function InstructorLivePage() {
       toast.error("العنوان والتاريخ مطلوبان");
       return;
     }
-    const payload: any = {
+    const payload: LiveSessionPayload = {
       title: form.title,
       description: form.description || null,
       scheduled_at: form.scheduled_at,
@@ -159,22 +193,22 @@ function InstructorLivePage() {
   const viewBookings = async (id: string) => {
     setViewBookingsFor(id);
     const { data } = await supabase
-      .from("live_session_bookings" as any)
+      .from("live_session_bookings")
       .select("id, user_id, status, joined_at, created_at")
       .eq("session_id", id)
       .order("created_at", { ascending: false });
 
-    const bookings = (data as any) || [];
+    const bookings = (data as LiveSessionBooking[] | null) || [];
     if (bookings.length === 0) { setBookingsList([]); return; }
 
-    const userIds = bookings.map((b: any) => b.user_id);
+    const userIds = bookings.map((b) => b.user_id);
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, full_name, phone")
       .in("user_id", userIds);
-    const profMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    const profMap = new Map((((profiles as BookingProfile[] | null) || []).map((p) => [p.user_id, p])));
 
-    setBookingsList(bookings.map((b: any) => ({ ...b, profile: profMap.get(b.user_id) })));
+    setBookingsList(bookings.map((b) => ({ ...b, profile: profMap.get(b.user_id) })));
   };
 
   return (

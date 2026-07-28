@@ -14,6 +14,9 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, responseHeaders);
 
@@ -59,8 +62,8 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true }), responseHeaders);
-  } catch (e: any) {
-    console.error("admin-delete-user error:", e);
-    return new Response(JSON.stringify({ error: e?.message || "Internal error" }), { status: 500, ...responseHeaders });
+  } catch (error: unknown) {
+    console.error("admin-delete-user error:", error);
+    return new Response(JSON.stringify({ error: getErrorMessage(error) || "Internal error" }), { status: 500, ...responseHeaders });
   }
 });

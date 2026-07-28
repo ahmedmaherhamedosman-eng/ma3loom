@@ -23,6 +23,21 @@ interface PaymentRow {
   user_name?: string;
 }
 
+interface CourseTitleRow {
+  id: string;
+  title: string;
+}
+
+interface SessionTitleRow {
+  id: string;
+  title: string;
+}
+
+interface ProfileNameRow {
+  user_id: string;
+  full_name: string;
+}
+
 const statusColor: Record<string, string> = {
   completed: "bg-success/10 text-success",
   pending: "bg-warm/15 text-warm-foreground",
@@ -54,21 +69,21 @@ function AdminPayments() {
 
     // Fetch course titles + live session titles + user names in batch
     const courseIds = [...new Set(pays.map((p) => p.course_id).filter((x): x is string => !!x))];
-    const sessionIds = [...new Set(pays.map((p: any) => p.live_session_id).filter((x: any): x is string => !!x))];
+    const sessionIds = [...new Set(pays.map((p) => p.live_session_id).filter((x): x is string => !!x))];
     const userIds = [...new Set(pays.map((p) => p.user_id))];
 
     const [coursesRes, sessionsRes, profilesRes] = await Promise.all([
-      courseIds.length ? supabase.from("courses").select("id, title").in("id", courseIds) : Promise.resolve({ data: [] as any[] }),
-      sessionIds.length ? supabase.from("live_sessions").select("id, title").in("id", sessionIds) : Promise.resolve({ data: [] as any[] }),
+      courseIds.length ? supabase.from("courses").select("id, title").in("id", courseIds) : Promise.resolve({ data: [] as CourseTitleRow[] }),
+      sessionIds.length ? supabase.from("live_sessions").select("id, title").in("id", sessionIds) : Promise.resolve({ data: [] as SessionTitleRow[] }),
       supabase.from("profiles").select("user_id, full_name").in("user_id", userIds),
     ]);
 
-    const courseMap = Object.fromEntries((coursesRes.data || []).map((c: any) => [c.id, c.title]));
-    const sessionMap = Object.fromEntries((sessionsRes.data || []).map((c: any) => [c.id, c.title]));
-    const userMap = Object.fromEntries((profilesRes.data || []).map((p: any) => [p.user_id, p.full_name]));
+    const courseMap = Object.fromEntries((((coursesRes.data as CourseTitleRow[] | null) || []).map((c) => [c.id, c.title])));
+    const sessionMap = Object.fromEntries((((sessionsRes.data as SessionTitleRow[] | null) || []).map((c) => [c.id, c.title])));
+    const userMap = Object.fromEntries((((profilesRes.data as ProfileNameRow[] | null) || []).map((p) => [p.user_id, p.full_name])));
 
     setPayments(
-      pays.map((p: any) => ({
+      pays.map((p) => ({
         ...p,
         course_title: p.course_id
           ? courseMap[p.course_id] || "—"

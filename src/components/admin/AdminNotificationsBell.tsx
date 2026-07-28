@@ -9,7 +9,8 @@ import { toast } from "sonner";
 // Light "ding" using WebAudio — no asset needed
 function playDing() {
   try {
-    const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    const audioWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
+    const Ctx = audioWindow.AudioContext || audioWindow.webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
     const o = ctx.createOscillator();
@@ -37,6 +38,10 @@ interface Notification {
   link: string | null;
   is_read: boolean;
   created_at: string;
+}
+
+interface NotificationInsertPayload {
+  new: Notification;
 }
 
 function formatTime(iso: string): string {
@@ -88,7 +93,7 @@ export function AdminNotificationsBell() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "admin_notifications" },
-        (payload: any) => {
+        (payload: NotificationInsertPayload) => {
           // Only react after the initial fetch — avoids ding on first mount
           if (initialLoadedRef.current) {
             const n = payload.new as Notification;

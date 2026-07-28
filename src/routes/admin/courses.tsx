@@ -22,6 +22,13 @@ interface CourseStats {
   avgProgress: number;
 }
 
+type CertificateRequirement = "completion" | "quiz" | "both" | "none";
+
+interface EnrollmentProgressRow {
+  course_id: string;
+  progress_percentage: number | null;
+}
+
 function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -68,7 +75,7 @@ function AdminCourses() {
     setCourseCategoryMap(map);
 
     const statsMap: Record<string, CourseStats> = {};
-    (enrollData || []).forEach((e: any) => {
+    (((enrollData as EnrollmentProgressRow[] | null) || [])).forEach((e) => {
       if (!statsMap[e.course_id]) statsMap[e.course_id] = { enrollments: 0, avgProgress: 0 };
       statsMap[e.course_id].enrollments++;
       statsMap[e.course_id].avgProgress += e.progress_percentage || 0;
@@ -131,7 +138,7 @@ function AdminCourses() {
       instructor: course.instructor,
       lessons_count: course.lessons_count,
       is_published: course.is_published,
-      certificate_requirement: ((course as any).certificate_requirement || "completion") as "completion" | "quiz" | "both" | "none",
+      certificate_requirement: ((course as Course & { certificate_requirement?: CertificateRequirement }).certificate_requirement || "completion") as CertificateRequirement,
     });
     setSelectedCats(courseCategoryMap[course.id] || []);
     setEditingId(course.id);
@@ -308,7 +315,7 @@ function AdminCourses() {
               <Label>شرط الحصول على الشهادة 🎓</Label>
               <Select
                 value={form.certificate_requirement}
-                onValueChange={(v) => setForm({ ...form, certificate_requirement: v as any })}
+                onValueChange={(v) => setForm({ ...form, certificate_requirement: v as CertificateRequirement })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

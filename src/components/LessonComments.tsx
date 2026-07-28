@@ -78,7 +78,7 @@ export function LessonComments({ lessonId, courseId, userId, isAdmin, isEnrolled
     const list = (rows || []) as CommentRow[];
     const userIds = Array.from(new Set(list.map((c) => c.user_id)));
 
-    let profilesMap: Record<string, ProfileLite> = {};
+    const profilesMap: Record<string, ProfileLite> = {};
     if (userIds.length > 0) {
       const { data: profs } = await supabase
         .from("profiles")

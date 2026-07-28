@@ -53,6 +53,20 @@ interface Payment {
   item_type: "course" | "book" | "live_session" | "other";
 }
 
+interface PaymentRow {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  course_id: string | null;
+  book_id: string | null;
+  live_session_id: string | null;
+  courses: { title: string } | null;
+  books: { title: string } | null;
+  live_sessions: { title: string } | null;
+}
+
 interface Certificate {
   id: string;
   verification_code: string;
@@ -159,7 +173,7 @@ function ProfilePage() {
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     if (data) {
-      setPayments(data.map((p: any) => {
+      setPayments((data as PaymentRow[]).map((p) => {
         const itemType: Payment["item_type"] = p.course_id ? "course" : p.book_id ? "book" : p.live_session_id ? "live_session" : "other";
         const title = p.courses?.title || p.books?.title || p.live_sessions?.title;
         return {

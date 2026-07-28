@@ -37,6 +37,31 @@ interface Student {
   lastActivity: string | null;
 }
 
+interface EnrollmentRow {
+  user_id: string;
+  course_id: string;
+  progress_percentage: number | null;
+  completed: boolean | null;
+  enrolled_at: string;
+  last_lesson_id: string | null;
+  courses: { title: string } | null;
+}
+
+interface LessonRow {
+  id: string;
+  title: string;
+}
+
+interface ProgressRow {
+  user_id: string;
+  last_watched_at: string;
+}
+
+interface PaymentRow {
+  user_id: string;
+  amount: number | null;
+}
+
 const userTypeLabel: Record<string, string> = {
   student: "طالب",
   teacher: "معلم",
@@ -79,10 +104,10 @@ function AdminStudents() {
     ]);
 
     const profiles = profilesRes.data || [];
-    const enrollments = (enrollRes.data || []) as any[];
+    const enrollments = (enrollRes.data || []) as EnrollmentRow[];
     const payments = paymentsRes.data || [];
-    const lessons = (lessonsRes.data || []) as any[];
-    const progress = (progressRes.data || []) as any[];
+    const lessons = (lessonsRes.data || []) as LessonRow[];
+    const progress = (progressRes.data || []) as ProgressRow[];
 
     const lessonTitleMap = Object.fromEntries(lessons.map((l) => [l.id, l.title]));
 
@@ -101,7 +126,7 @@ function AdminStudents() {
     });
 
     const paidMap: Record<string, number> = {};
-    payments.forEach((p: any) => {
+    (payments as PaymentRow[]).forEach((p) => {
       paidMap[p.user_id] = (paidMap[p.user_id] || 0) + Number(p.amount || 0);
     });
 
@@ -130,7 +155,7 @@ function AdminStudents() {
         };
       })
     );
-    setAllCourses((coursesRes.data || []) as any[]);
+    setAllCourses((coursesRes.data || []) as { id: string; title: string }[]);
     setLoading(false);
   };
 

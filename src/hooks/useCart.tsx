@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,6 +15,13 @@ export interface CartItem {
     currency?: string | null;
     image_url: string | null;
   };
+}
+
+interface CartItemRow {
+  id: string;
+  course_id: string;
+  added_at: string;
+  courses: CartItem["course"];
 }
 
 interface CartContextValue {
@@ -54,7 +62,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     if (data) {
       setItems(
-        data.map((row: any) => ({
+        (data as CartItemRow[]).map((row) => ({
           id: row.id,
           course_id: row.course_id,
           added_at: row.added_at,

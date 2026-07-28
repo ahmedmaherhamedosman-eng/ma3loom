@@ -11,6 +11,9 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -69,7 +72,7 @@ serve(async (req) => {
       quantity: 1,
     }));
 
-    const origin = req.headers.get("origin") || "https://ma3loom.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("PUBLIC_SITE_URL") || "http://localhost:5173";
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: lineItems,
@@ -90,8 +93,8 @@ serve(async (req) => {
     });
 
     return jsonResponse({ url: session.url, sessionId: session.id });
-  } catch (e: any) {
-    console.error("stripe-create-checkout error:", e?.message, e);
-    return jsonResponse({ error: e?.message || "Internal error" }, 500);
+  } catch (error: unknown) {
+    console.error("stripe-create-checkout error:", getErrorMessage(error), error);
+    return jsonResponse({ error: getErrorMessage(error) || "Internal error" }, 500);
   }
 });

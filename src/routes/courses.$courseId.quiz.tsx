@@ -26,6 +26,15 @@ interface Question {
   sort_order: number;
 }
 
+interface QuestionRow extends Omit<Question, "options"> {
+  options: unknown;
+}
+
+interface AttemptSummary {
+  score: number;
+  passed: boolean;
+}
+
 // Fisher–Yates shuffle
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -94,16 +103,16 @@ function QuizPage() {
       const { data: qData } = await supabase
         .from("quiz_questions").select("*")
         .eq("quiz_id", quizData.id).order("sort_order");
-      setQuestions(((qData as any[]) || []).map((q) => ({
+      setQuestions((((qData as QuestionRow[] | null) || []).map((q) => ({
         ...q,
         options: Array.isArray(q.options) ? q.options : [],
-      })));
+      })) as Question[]));
 
       const { data: lastAttempt } = await supabase
         .from("quiz_attempts").select("score, passed")
         .eq("quiz_id", quizData.id).eq("user_id", uid)
         .order("completed_at", { ascending: false }).limit(1).maybeSingle();
-      if (lastAttempt) setPreviousAttempt(lastAttempt as any);
+      if (lastAttempt) setPreviousAttempt(lastAttempt as AttemptSummary);
 
       setLoading(false);
     };

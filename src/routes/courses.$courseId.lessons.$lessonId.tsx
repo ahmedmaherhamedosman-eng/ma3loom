@@ -56,6 +56,11 @@ interface Resource {
   file_type: string | null;
 }
 
+interface LessonProgressRow {
+  lesson_id: string;
+  completed: boolean | null;
+}
+
 function getYouTubeEmbedUrl(url: string) {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
@@ -118,7 +123,8 @@ function LessonViewerPage() {
       setCommentsCount(commentsRes.count || 0);
 
       const isFree = courseRes.data?.is_free || courseRes.data?.price === 0;
-      const isPreviewLesson = !!(lessonRes.data as any)?.is_preview;
+      const loadedLesson = lessonRes.data as Lesson | null;
+      const isPreviewLesson = !!loadedLesson?.is_preview;
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user.id || null;
       setUserId(uid);
@@ -164,7 +170,7 @@ function LessonViewerPage() {
           supabase.from("lesson_progress").select("watched_seconds, completed").eq("user_id", uid).eq("lesson_id", lessonId).maybeSingle(),
         ]);
         const completed = new Set<string>();
-        (progRes.data || []).forEach((p: any) => p.completed && completed.add(p.lesson_id));
+        (((progRes.data as LessonProgressRow[] | null) || [])).forEach((p) => p.completed && completed.add(p.lesson_id));
         setCompletedIds(completed);
         setProgressPct(enrollProgRes.data?.progress_percentage ?? 0);
         if (currentLessonProgRes.data && !currentLessonProgRes.data.completed) {
@@ -296,7 +302,7 @@ function LessonViewerPage() {
       .filter((l) => !l.chapter_id)
       .map((l) => ({
         id: l.id, title: l.title, duration_minutes: l.duration_minutes,
-        completed: completedIds.has(l.id), is_preview: (l as any).is_preview,
+        completed: completedIds.has(l.id), is_preview: l.is_preview,
       }));
     const built: SidebarChapter[] = chapters.map((ch) => ({
       id: ch.id,
@@ -305,7 +311,7 @@ function LessonViewerPage() {
         .filter((l) => l.chapter_id === ch.id)
         .map((l) => ({
           id: l.id, title: l.title, duration_minutes: l.duration_minutes,
-          completed: completedIds.has(l.id), is_preview: (l as any).is_preview,
+          completed: completedIds.has(l.id), is_preview: l.is_preview,
         })),
     }));
     return { built, uncat };

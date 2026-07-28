@@ -28,6 +28,21 @@ interface LiveSession {
   bookings_count?: number;
 }
 
+interface LiveSessionPayload {
+  title: string;
+  description: string | null;
+  scheduled_at: string;
+  duration_minutes: number;
+  meeting_link: string | null;
+  platform: string;
+  status: string;
+  course_id: string | null;
+  instructor_name: string | null;
+  is_free: boolean;
+  price: number;
+  max_seats: number | null;
+}
+
 const platformLabel: Record<string, string> = {
   zoom: "Zoom",
   teams: "Microsoft Teams",
@@ -107,7 +122,7 @@ function AdminLive() {
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.scheduled_at) return;
-    const payload: any = {
+    const payload: LiveSessionPayload = {
       title: form.title,
       description: form.description || null,
       scheduled_at: form.scheduled_at,

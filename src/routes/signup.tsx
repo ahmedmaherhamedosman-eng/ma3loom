@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,16 +34,24 @@ function SignupPage() {
   const handleGoogle = async () => {
     setError("");
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/complete-profile`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/complete-profile`,
+        queryParams: {
+          prompt: "select_account",
+        },
+      },
     });
-    if (result.error) {
+
+    if (error) {
       setError("فشل التسجيل بجوجل، حاول مرة أخرى");
       setGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/complete-profile" });
+
+    // If redirect is blocked by the browser, allow user to retry.
+    setGoogleLoading(false);
   };
 
   const country = useMemo(() => getCountryByCode(countryCode)!, [countryCode]);

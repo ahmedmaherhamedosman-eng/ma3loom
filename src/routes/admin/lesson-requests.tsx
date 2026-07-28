@@ -14,6 +14,7 @@ export const Route = createFileRoute("/admin/lesson-requests")({
 interface Specialty {
   id: string;
   name: string;
+  slug: string;
   icon: string | null;
   price_per_hour: number;
   is_active: boolean;
@@ -72,7 +73,7 @@ function AdminLessonRequests() {
       supabase.from("lesson_requests").select("*, tutoring_specialties(name, icon)").order("created_at", { ascending: false }),
       supabase.from("tutoring_specialties").select("*").order("sort_order"),
     ]);
-    setRequests((r as any) || []);
+    setRequests((r as Request[] | null) || []);
     setSpecialties(s || []);
     setLoading(false);
   };
@@ -103,7 +104,7 @@ function AdminLessonRequests() {
   const editSpec = (s: Specialty) => {
     setSpecForm({
       name: s.name,
-      slug: (s as any).slug || "",
+      slug: s.slug || "",
       description: s.description || "",
       icon: s.icon || "📚",
       price_per_hour: s.price_per_hour,

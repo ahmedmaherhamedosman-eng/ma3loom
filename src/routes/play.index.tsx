@@ -4,6 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PlayGame, GameCategory, GameLevel } from "@/lib/gameTypes";
 import { useGameProgress } from "@/hooks/useGameSession";
 
+interface DailyChallenge {
+  title: string;
+  description: string | null;
+  bonus_xp: number;
+  bonus_coins: number;
+  game_id: string | null;
+}
+
 export const Route = createFileRoute("/play/")({
   head: () => ({
     meta: [
@@ -23,7 +31,7 @@ function PlayHome() {
   const [newest, setNewest] = useState<PlayGame[]>([]);
   const [level, setLevel] = useState<GameLevel | null>(null);
   const [nextLevel, setNextLevel] = useState<GameLevel | null>(null);
-  const [dailyChallenge, setDailyChallenge] = useState<any>(null);
+  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [loading, setLoading] = useState(true);
 
   const xp = isAuthed ? progress?.xp || 0 : guest.xp;
@@ -46,7 +54,7 @@ function PlayHome() {
       const curLevelNum = isAuthed ? progress?.current_level || 1 : 1;
       setLevel(lvls.find((l) => l.level_number === curLevelNum) || lvls[0] || null);
       setNextLevel(lvls.find((l) => l.level_number === curLevelNum + 1) || null);
-      setDailyChallenge(dc.data);
+      setDailyChallenge((dc.data as DailyChallenge | null) ?? null);
       setLoading(false);
     })();
   }, [isAuthed, progress?.current_level]);

@@ -287,7 +287,7 @@ function AdminHtmlQuizzes() {
                   <input
                     type="radio"
                     checked={form.source_type === s.value}
-                    onChange={() => setForm({ ...form, source_type: s.value as any })}
+                    onChange={() => setForm({ ...form, source_type: s.value as "file" | "code" | "url" })}
                     className="sr-only peer"
                   />
                   <div className="p-3 rounded-lg border-2 border-input peer-checked:border-primary peer-checked:bg-primary/5">
@@ -359,7 +359,7 @@ function AdminHtmlQuizzes() {
                   <input
                     type="radio"
                     checked={form.access_type === a.value}
-                    onChange={() => setForm({ ...form, access_type: a.value as any })}
+                    onChange={() => setForm({ ...form, access_type: a.value as "public" | "authenticated" | "course_enrolled" })}
                     className="sr-only peer"
                   />
                   <div className="p-3 rounded-lg border-2 border-input peer-checked:border-primary peer-checked:bg-primary/5">

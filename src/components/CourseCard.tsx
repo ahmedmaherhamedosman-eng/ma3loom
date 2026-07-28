@@ -138,9 +138,10 @@ export function CourseCard({
 
       // Fallback to course details
       goToCourse();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[CourseCard] handleStart error:", err);
-      toast.error("حصل خطأ — جرّب تاني", { description: err?.message });
+      const message = err instanceof Error ? err.message : "خطأ غير متوقع";
+      toast.error("حصل خطأ — جرّب تاني", { description: message });
       goToCourse();
     } finally {
       setLoading(false);

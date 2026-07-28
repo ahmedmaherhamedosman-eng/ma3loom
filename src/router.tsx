@@ -1,6 +1,7 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
+/* eslint-disable react-refresh/only-export-components */
 function DefaultErrorComponent({
   error,
   reset,

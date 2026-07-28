@@ -1458,6 +1458,347 @@ export type Database = {
         }
         Relationships: []
       }
+      instructor_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          teacher_application_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          teacher_application_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          teacher_application_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_availability_teacher_application_id_fkey"
+            columns: ["teacher_application_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      private_lesson_bookings: {
+        Row: {
+          added_to_calendar: boolean
+          booking_status: string
+          calendar_event_ics: string | null
+          cancel_reason: string | null
+          coupon_code: string | null
+          created_at: string
+          discount_amount: number
+          duration_minutes: number
+          education_level: string | null
+          homework_url: string | null
+          id: string
+          instructor_user_id: string | null
+          lesson_date: string | null
+          lesson_time: string | null
+          meeting_link: string | null
+          package_id: string
+          payment_status: string
+          recommended_similar_packages: string[]
+          reschedule_count: number
+          seats_left_snapshot: number | null
+          sessions_count: number
+          student_email: string | null
+          student_name: string
+          student_notes: string | null
+          student_phone: string | null
+          subject: string
+          subtotal: number
+          tax_amount: number
+          teacher_application_id: string | null
+          teacher_notes: string | null
+          timezone: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          added_to_calendar?: boolean
+          booking_status?: string
+          calendar_event_ics?: string | null
+          cancel_reason?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_amount?: number
+          duration_minutes?: number
+          education_level?: string | null
+          homework_url?: string | null
+          id?: string
+          instructor_user_id?: string | null
+          lesson_date?: string | null
+          lesson_time?: string | null
+          meeting_link?: string | null
+          package_id: string
+          payment_status?: string
+          recommended_similar_packages?: string[]
+          reschedule_count?: number
+          seats_left_snapshot?: number | null
+          sessions_count?: number
+          student_email?: string | null
+          student_name: string
+          student_notes?: string | null
+          student_phone?: string | null
+          subject: string
+          subtotal?: number
+          tax_amount?: number
+          teacher_application_id?: string | null
+          teacher_notes?: string | null
+          timezone?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          added_to_calendar?: boolean
+          booking_status?: string
+          calendar_event_ics?: string | null
+          cancel_reason?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_amount?: number
+          duration_minutes?: number
+          education_level?: string | null
+          homework_url?: string | null
+          id?: string
+          instructor_user_id?: string | null
+          lesson_date?: string | null
+          lesson_time?: string | null
+          meeting_link?: string | null
+          package_id?: string
+          payment_status?: string
+          recommended_similar_packages?: string[]
+          reschedule_count?: number
+          seats_left_snapshot?: number | null
+          sessions_count?: number
+          student_email?: string | null
+          student_name?: string
+          student_notes?: string | null
+          student_phone?: string | null
+          subject?: string
+          subtotal?: number
+          tax_amount?: number
+          teacher_application_id?: string | null
+          teacher_notes?: string | null
+          timezone?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "private_lesson_bookings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "private_lesson_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "private_lesson_bookings_teacher_application_id_fkey"
+            columns: ["teacher_application_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      private_lesson_packages: {
+        Row: {
+          badge: string | null
+          cancellation_policy: string | null
+          color_key: string
+          created_at: string
+          discount_percent: number
+          duration_minutes: number
+          feature_list: string[]
+          full_description: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          includes_certificate: boolean
+          includes_followup: boolean
+          includes_homework: boolean
+          includes_priority_booking: boolean
+          includes_question_bank: boolean
+          includes_reports: boolean
+          includes_reschedule: boolean
+          includes_summaries: boolean
+          includes_tech_support: boolean
+          includes_tests: boolean
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          old_price: number | null
+          price: number
+          refund_policy: string | null
+          seats_limit: number | null
+          seats_remaining: number | null
+          sessions_count: number
+          short_description: string | null
+          slug: string
+          sort_order: number
+          support_type: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          cancellation_policy?: string | null
+          color_key?: string
+          created_at?: string
+          discount_percent?: number
+          duration_minutes?: number
+          feature_list?: string[]
+          full_description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          includes_certificate?: boolean
+          includes_followup?: boolean
+          includes_homework?: boolean
+          includes_priority_booking?: boolean
+          includes_question_bank?: boolean
+          includes_reports?: boolean
+          includes_reschedule?: boolean
+          includes_summaries?: boolean
+          includes_tech_support?: boolean
+          includes_tests?: boolean
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          old_price?: number | null
+          price?: number
+          refund_policy?: string | null
+          seats_limit?: number | null
+          seats_remaining?: number | null
+          sessions_count?: number
+          short_description?: string | null
+          slug: string
+          sort_order?: number
+          support_type?: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          cancellation_policy?: string | null
+          color_key?: string
+          created_at?: string
+          discount_percent?: number
+          duration_minutes?: number
+          feature_list?: string[]
+          full_description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          includes_certificate?: boolean
+          includes_followup?: boolean
+          includes_homework?: boolean
+          includes_priority_booking?: boolean
+          includes_question_bank?: boolean
+          includes_reports?: boolean
+          includes_reschedule?: boolean
+          includes_summaries?: boolean
+          includes_tech_support?: boolean
+          includes_tests?: boolean
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          old_price?: number | null
+          price?: number
+          refund_policy?: string | null
+          seats_limit?: number | null
+          seats_remaining?: number | null
+          sessions_count?: number
+          short_description?: string | null
+          slug?: string
+          sort_order?: number
+          support_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      private_lesson_reviews: {
+        Row: {
+          audio_video_rating: number
+          booking_id: string
+          comment: string | null
+          created_at: string
+          explanation_quality_rating: number
+          id: string
+          is_published: boolean
+          overall_rating: number
+          punctuality_rating: number
+          teacher_application_id: string
+          teacher_rating: number
+          user_id: string
+        }
+        Insert: {
+          audio_video_rating: number
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          explanation_quality_rating: number
+          id?: string
+          is_published?: boolean
+          overall_rating: number
+          punctuality_rating: number
+          teacher_application_id: string
+          teacher_rating: number
+          user_id: string
+        }
+        Update: {
+          audio_video_rating?: number
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          explanation_quality_rating?: number
+          id?: string
+          is_published?: boolean
+          overall_rating?: number
+          punctuality_rating?: number
+          teacher_application_id?: string
+          teacher_rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "private_lesson_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "private_lesson_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "private_lesson_reviews_teacher_application_id_fkey"
+            columns: ["teacher_application_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -1610,6 +1951,173 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_applications: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          badge: string | null
+          bio_full: string | null
+          bio_short: string | null
+          certificates_urls: string[]
+          city: string
+          country: string
+          courses_count: number
+          created_at: string
+          decision_reason: string | null
+          display_order: number
+          education_level: string
+          email: string
+          full_name: string
+          grade_levels: string[]
+          graduation_year: number | null
+          id: string
+          instructor_user_id: string | null
+          intro_video_url: string | null
+          is_home_visible: boolean
+          linkedin_url: string | null
+          phone: string
+          profile_image_url: string | null
+          rating_avg: number
+          rating_count: number
+          resume_url: string | null
+          review_notes: string | null
+          social_links: Json
+          specialization: string
+          status: string
+          students_count: number
+          teaching_subject: string
+          teaching_type: string
+          terms_accepted: boolean
+          university: string
+          updated_at: string
+          availability: string | null
+          years_experience: number
+          youtube_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          badge?: string | null
+          bio_full?: string | null
+          bio_short?: string | null
+          certificates_urls?: string[]
+          city: string
+          country: string
+          courses_count?: number
+          created_at?: string
+          decision_reason?: string | null
+          display_order?: number
+          education_level: string
+          email: string
+          full_name: string
+          grade_levels?: string[]
+          graduation_year?: number | null
+          id?: string
+          instructor_user_id?: string | null
+          intro_video_url?: string | null
+          is_home_visible?: boolean
+          linkedin_url?: string | null
+          phone: string
+          profile_image_url?: string | null
+          rating_avg?: number
+          rating_count?: number
+          resume_url?: string | null
+          review_notes?: string | null
+          social_links?: Json
+          specialization: string
+          status?: string
+          students_count?: number
+          teaching_subject: string
+          teaching_type?: string
+          terms_accepted?: boolean
+          university: string
+          updated_at?: string
+          availability?: string | null
+          years_experience?: number
+          youtube_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          badge?: string | null
+          bio_full?: string | null
+          bio_short?: string | null
+          certificates_urls?: string[]
+          city?: string
+          country?: string
+          courses_count?: number
+          created_at?: string
+          decision_reason?: string | null
+          display_order?: number
+          education_level?: string
+          email?: string
+          full_name?: string
+          grade_levels?: string[]
+          graduation_year?: number | null
+          id?: string
+          instructor_user_id?: string | null
+          intro_video_url?: string | null
+          is_home_visible?: boolean
+          linkedin_url?: string | null
+          phone?: string
+          profile_image_url?: string | null
+          rating_avg?: number
+          rating_count?: number
+          resume_url?: string | null
+          review_notes?: string | null
+          social_links?: Json
+          specialization?: string
+          status?: string
+          students_count?: number
+          teaching_subject?: string
+          teaching_type?: string
+          terms_accepted?: boolean
+          university?: string
+          updated_at?: string
+          availability?: string | null
+          years_experience?: number
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      teacher_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          rating: number
+          student_name: string
+          teacher_application_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          rating: number
+          student_name: string
+          teacher_application_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          rating?: number
+          student_name?: string
+          teacher_application_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_reviews_teacher_application_id_fkey"
+            columns: ["teacher_application_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_applications"
             referencedColumns: ["id"]
           },
         ]
@@ -1796,6 +2304,36 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          title?: string
           user_id?: string
         }
         Relationships: []

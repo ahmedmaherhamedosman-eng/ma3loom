@@ -30,6 +30,10 @@ interface Question {
   sort_order: number;
 }
 
+interface QuestionRow extends Omit<Question, "options"> {
+  options: unknown;
+}
+
 function AdminQuizzes() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -50,7 +54,7 @@ function AdminQuizzes() {
     setCourses(cData || []);
     setQuizzes((qData || []) as Quiz[]);
     const map: Record<string, Question[]> = {};
-    (questionsData || []).forEach((q: any) => {
+    (((questionsData as QuestionRow[] | null) || [])).forEach((q) => {
       if (!map[q.quiz_id]) map[q.quiz_id] = [];
       map[q.quiz_id].push({
         ...q,
@@ -292,7 +296,7 @@ function QuestionEditor({
     setText(question.question_text);
     setOptions(question.options);
     setCorrect(question.correct_option);
-  }, [question.id]);
+  }, [question.question_text, question.options, question.correct_option]);
 
   const dirty =
     text !== question.question_text ||

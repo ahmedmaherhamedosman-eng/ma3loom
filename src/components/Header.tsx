@@ -30,7 +30,8 @@ const moreLinks = [
   { to: "/games", label: "🕹️ ألعاب HTML" },
   { to: "/quizzes", label: "📝 اختبارات" },
   { to: "/categories", label: "🏷️ التصنيفات" },
-  { to: "/tutoring", label: "👨‍🏫 حصص خصوصية" },
+  { to: "/private-lessons", label: "👨‍🏫 حصص خصوصية" },
+  { to: "/teach-with-us", label: "🧑‍🏫 انضم كمعلم" },
   { to: "/about", label: "ℹ️ عن معلوم" },
 ] as const;
 

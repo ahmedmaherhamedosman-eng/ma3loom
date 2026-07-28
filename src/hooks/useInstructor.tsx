@@ -18,7 +18,7 @@ export function useInstructor() {
         .from("user_roles")
         .select("role")
         .eq("user_id", session.user.id)
-        .eq("role", "instructor" as any)
+        .eq("role", "instructor")
         .maybeSingle();
       setIsInstructor(!!data);
       setIsLoading(false);
@@ -36,7 +36,7 @@ export function useInstructor() {
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id)
-          .eq("role", "instructor" as any)
+          .eq("role", "instructor")
           .maybeSingle()
           .then(({ data }) => {
             setIsInstructor(!!data);

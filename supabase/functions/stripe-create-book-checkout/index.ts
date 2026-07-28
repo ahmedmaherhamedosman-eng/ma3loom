@@ -10,6 +10,9 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -45,7 +48,7 @@ serve(async (req) => {
     if (existing) return jsonResponse({ error: "لقد اشتريت هذا الكتاب مسبقاً" }, 400);
 
     const currency = (book.currency || "SAR").toLowerCase();
-    const origin = req.headers.get("origin") || "https://ma3loom.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("PUBLIC_SITE_URL") || "http://localhost:5173";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -81,8 +84,8 @@ serve(async (req) => {
     });
 
     return jsonResponse({ url: session.url, sessionId: session.id });
-  } catch (e: any) {
-    console.error("stripe-create-book-checkout error:", e?.message, e);
-    return jsonResponse({ error: e?.message || "Internal error" }, 500);
+  } catch (error: unknown) {
+    console.error("stripe-create-book-checkout error:", getErrorMessage(error), error);
+    return jsonResponse({ error: getErrorMessage(error) || "Internal error" }, 500);
   }
 });

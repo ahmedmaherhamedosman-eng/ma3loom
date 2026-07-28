@@ -10,6 +10,15 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
+type PaymentFailedObject = {
+  metadata?: Record<string, string> | null;
+  currency?: string | null;
+  id?: string;
+};
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
@@ -26,9 +35,10 @@ Deno.serve(async (req) => {
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error("Webhook signature verification failed:", err?.message);
-    return new Response(`Webhook Error: ${err?.message}`, { status: 400 });
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
+    console.error("Webhook signature verification failed:", message);
+    return new Response(`Webhook Error: ${message}`, { status: 400 });
   }
 
   try {
@@ -49,7 +59,7 @@ Deno.serve(async (req) => {
       }
       case "checkout.session.async_payment_failed":
       case "payment_intent.payment_failed": {
-        const obj = event.data.object as any;
+        const obj = event.data.object as PaymentFailedObject;
         await handlePaymentFailed(obj);
         break;
       }
@@ -61,8 +71,8 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (e: any) {
-    console.error("Webhook handler error:", e?.message, e);
+  } catch (error: unknown) {
+    console.error("Webhook handler error:", getErrorMessage(error), error);
     return new Response("Webhook handler error", { status: 500 });
   }
 });
@@ -264,7 +274,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log(`✅ Enrolled user ${userId} in ${courseIds.length} courses`);
 }
 
-async function handlePaymentFailed(obj: any) {
+async function handlePaymentFailed(obj: PaymentFailedObject) {
   const meta = obj.metadata || {};
   const userId = meta.user_id;
   const courseIdsRaw = meta.course_ids || "";

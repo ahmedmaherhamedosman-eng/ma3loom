@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/CourseCard";
+import { EliteTeachersSection } from "@/components/EliteTeachersSection";
 import { supabase } from "@/integrations/supabase/client";
+import { type TeacherProfileRow } from "@/lib/teachers";
 import heroImage from "@/assets/hero-students.jpg";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +29,7 @@ interface CourseRow {
   students_count: number;
   lessons_count: number;
   price: number;
+  currency: string | null;
   image_url: string | null;
 }
 
@@ -77,12 +80,13 @@ function HomePage() {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [liveSessions, setLiveSessions] = useState<LiveRow[]>([]);
   const [specialties, setSpecialties] = useState<SpecialtyRow[]>([]);
+  const [teachers, setTeachers] = useState<TeacherProfileRow[]>([]);
   const [stats, setStats] = useState({ students: 0, courses: 0, lessons: 0 });
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
-      const [coursesRes, postsRes, liveRes, profilesRes, specRes] = await Promise.all([
+      const [coursesRes, postsRes, liveRes, profilesRes, specRes, teachersRes] = await Promise.all([
         supabase.from("courses").select("id,title,description,instructor,category,level,students_count,lessons_count,price,currency,image_url")
           .eq("is_published", true).order("created_at", { ascending: false }).limit(4),
         supabase.from("posts").select("id,title,excerpt,image_url,published_at")
@@ -92,12 +96,20 @@ function HomePage() {
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("tutoring_specialties").select("id,name,slug,description,icon,price_per_hour")
           .eq("is_active", true).order("sort_order").limit(6),
+        supabase
+          .from("teacher_applications")
+          .select("id,full_name,specialization,teaching_subject,years_experience,bio_short,profile_image_url,badge,students_count,courses_count,rating_avg,rating_count,is_home_visible,display_order,status,city,country,availability,teaching_type,linkedin_url,youtube_url,intro_video_url,bio_full")
+          .eq("status", "accepted")
+          .eq("is_home_visible", true)
+          .order("display_order", { ascending: true })
+          .limit(6),
       ]);
 
       setCourses(coursesRes.data || []);
       setPosts(postsRes.data || []);
       setLiveSessions(liveRes.data || []);
       setSpecialties(specRes.data || []);
+      setTeachers((teachersRes.data as TeacherProfileRow[] | null) || []);
 
       const totalLessons = (coursesRes.data || []).reduce((s, c) => s + (c.lessons_count || 0), 0);
       setStats({
@@ -335,6 +347,24 @@ function HomePage() {
         </section>
       )}
 
+      <section className="py-14 bg-gradient-to-l from-primary/10 via-warm/10 to-background">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-border/70 glass p-7 md:p-10 flex flex-col md:flex-row items-center justify-between gap-5">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-2">🎓 الحصص الخصوصية</h2>
+              <p className="text-muted-foreground max-w-2xl">
+                باقات احترافية مع نخبة المعلمين: حصة مفردة، أسبوعية، شهرية، ومكثفة للاستعداد للاختبارات.
+              </p>
+            </div>
+            <Link to="/private-lessons">
+              <Button variant="hero" size="xl">استعرض الباقات الآن</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <EliteTeachersSection teachers={teachers} />
+
       {/* Featured Courses */}
       <section className="py-20 lg:py-28 bg-gradient-to-b from-muted/40 via-muted/30 to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -369,7 +399,7 @@ function HomePage() {
                   students={course.students_count}
                   lessons={course.lessons_count}
                   price={course.price === 0 ? "مجاني" : course.price}
-                  currency={(course as any).currency}
+                  currency={course.currency}
                   image={course.image_url || "/placeholder.svg"}
                   isEnrolled={enrolledIds.has(course.id)}
                 />
