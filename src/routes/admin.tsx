@@ -22,6 +22,7 @@ const sidebarLinks: { to: string; label: string; icon: string; exact?: boolean }
   { to: "/admin/posts", label: "المدونة", icon: "📝" },
   { to: "/admin/live", label: "الحصص المباشرة", icon: "🔴" },
   { to: "/admin/instructors", label: "المدرسون", icon: "👨‍🏫" },
+  { to: "/admin/teachers", label: "إدارة المعلمين", icon: "🧑‍🏫" },
   { to: "/admin/teacher-requests", label: "طلبات المعلمين", icon: "🧑‍💼" },
   { to: "/admin/games", label: "الألعاب التعليمية", icon: "🎮" },
   { to: "/admin/books", label: "الكتب", icon: "📚" },

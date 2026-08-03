@@ -31,15 +31,8 @@ export default function PackageCard({ pkg }:{pkg:Package}){
     setError(null)
     setLoading(true)
     try{
-      // If not authenticated, redirect to login and include redirect to confirm with packageId
-      if (!isAuthenticated) {
-        try{ localStorage.setItem('selectedPackageId', pkg.id) }catch(e){}
-        const redirect = `/private-lessons/confirm?packageId=${encodeURIComponent(pkg.id)}`
-        navigate({ to: '/login', search: { redirect } })
-        return
-      }
-
-      // authenticated: save in app state and navigate to confirm
+      // Always save selection and navigate to confirmation page (do not force login here)
+      try { localStorage.setItem('selectedPackageId', pkg.id) } catch (e) {}
       setSelectedPackage(pkg.id)
       navigate({ to: '/private-lessons/confirm', search: { packageId: pkg.id } })
     }catch(e:any){

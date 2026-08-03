@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Eye, CheckCircle2, XCircle, MessageSquareWarning, Trash2, Save } from "lucide-react";
+import { Eye, CheckCircle2, XCircle, MessageSquareWarning, Trash2, Save, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,7 @@ function AdminTeacherRequestsPage() {
   const [decisionReason, setDecisionReason] = useState("");
   const [reviewNotes, setReviewNotes] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [saving, setSaving] = useState(false);
   const [editable, setEditable] = useState<EditableFields>({
     is_home_visible: false,
@@ -88,10 +89,35 @@ function AdminTeacherRequestsPage() {
     void load();
   }, [load]);
 
+  const stats = useMemo(() => {
+    const initial = {
+      total: rows.length,
+      pending: 0,
+      under_review: 0,
+      accepted: 0,
+      needs_changes: 0,
+      rejected: 0,
+    };
+
+    rows.forEach((row) => {
+      if (row.status in initial) {
+        initial[row.status as keyof typeof initial] += 1;
+      }
+    });
+
+    return initial;
+  }, [rows]);
+
   const filteredRows = useMemo(() => {
-    if (statusFilter === "all") return rows;
-    return rows.filter((r) => r.status === statusFilter);
-  }, [rows, statusFilter]);
+    const term = searchTerm.trim().toLowerCase();
+    return rows.filter((row) => {
+      const matchesStatus = statusFilter === "all" ? true : row.status === statusFilter;
+      if (!term) return matchesStatus;
+
+      const haystack = `${row.full_name} ${row.email} ${row.specialization} ${row.teaching_subject} ${row.city || ""} ${row.country || ""}`.toLowerCase();
+      return matchesStatus && haystack.includes(term);
+    });
+  }, [rows, statusFilter, searchTerm]);
 
   const selected = useMemo(() => rows.find((r) => r.id === selectedId) || null, [rows, selectedId]);
 
@@ -116,7 +142,22 @@ function AdminTeacherRequestsPage() {
     if (!requestId) return;
 
     setSaving(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      toast.error("تعذّرت العملية", { description: "لم يتم العثور على جلسة مستخدم نشطة." });
+      setSaving(false);
+      return;
+    }
+
     const { error } = await supabase.functions.invoke("admin-process-teacher-application", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: {
         applicationId: requestId,
         action,
@@ -187,21 +228,40 @@ function AdminTeacherRequestsPage() {
         <p className="text-sm text-muted-foreground mt-1">مراجعة الطلبات، القبول/الرفض، وإدارة الظهور في الرئيسية</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {STATUS_FILTERS.map((status) => (
-          <button
-            key={status}
-            type="button"
-            onClick={() => setStatusFilter(status)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-              statusFilter === status
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {status === "all" ? "الكل" : statusLabel[status] || status}
-          </button>
-        ))}
+      <div className="grid gap-3 md:grid-cols-5">
+        <SummaryCard title="إجمالي الطلبات" value={stats.total} tone="default" />
+        <SummaryCard title="قيد الانتظار" value={stats.pending} tone="pending" />
+        <SummaryCard title="مقبولة" value={stats.accepted} tone="success" />
+        <SummaryCard title="تحتاج تعديلات" value={stats.needs_changes} tone="warning" />
+        <SummaryCard title="مرفوضة" value={stats.rejected} tone="danger" />
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 md:flex-row md:items-center md:justify-between">
+        <div className="relative w-full md:max-w-sm">
+          <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="ابحث بالاسم أو البريد أو التخصص..."
+            className="pr-9"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {STATUS_FILTERS.map((status) => (
+            <button
+              key={status}
+              type="button"
+              onClick={() => setStatusFilter(status)}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                statusFilter === status
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {status === "all" ? "الكل" : statusLabel[status] || status}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid xl:grid-cols-[1.2fr_1fr] gap-6">
@@ -209,7 +269,7 @@ function AdminTeacherRequestsPage() {
           {loading ? (
             <div className="p-8 text-center text-muted-foreground">جاري تحميل الطلبات...</div>
           ) : filteredRows.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">لا توجد طلبات في هذا التصنيف.</div>
+            <div className="p-8 text-center text-muted-foreground">لا توجد طلبات تطابق البحث أو الفلتر الحالي.</div>
           ) : (
             <Table>
               <TableHeader>
@@ -228,13 +288,12 @@ function AdminTeacherRequestsPage() {
                       <button type="button" onClick={() => setSelectedId(row.id)} className="text-start">
                         <p className="font-semibold text-foreground">{row.full_name}</p>
                         <p className="text-xs text-muted-foreground" dir="ltr">{row.email}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{row.bio_short || "بدون نبذة مختصرة"}</p>
                       </button>
                     </TableCell>
                     <TableCell>{row.specialization}</TableCell>
                     <TableCell>
-                      <span className="rounded-full bg-muted px-2 py-1 text-xs">
-                        {statusLabel[row.status] || row.status}
-                      </span>
+                      <StatusBadge status={row.status} />
                     </TableCell>
                     <TableCell>{new Date(row.created_at).toLocaleDateString("ar-EG")}</TableCell>
                     <TableCell>
@@ -265,9 +324,20 @@ function AdminTeacherRequestsPage() {
             <p className="text-muted-foreground text-sm">اختر طلباً لعرض التفاصيل.</p>
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">{selected.full_name}</h2>
-                <p className="text-sm text-muted-foreground">{selected.specialization} • {selected.teaching_subject}</p>
+              <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">{selected.full_name}</h2>
+                    <p className="text-sm text-muted-foreground">{selected.specialization} • {selected.teaching_subject}</p>
+                  </div>
+                  <StatusBadge status={selected.status} />
+                </div>
+
+                {selected.bio_full ? (
+                  <p className="mt-3 text-sm leading-6 text-foreground/90">{selected.bio_full}</p>
+                ) : (
+                  <p className="mt-3 text-sm text-muted-foreground">لا توجد نبذة تفصيلية لهذا الطلب بعد.</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -279,24 +349,27 @@ function AdminTeacherRequestsPage() {
                 <Info label="وافق على الشروط" value={selected.terms_accepted ? "نعم" : "لا"} />
               </div>
 
-              {selected.resume_url && (
-                <a href={selected.resume_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline inline-block">
-                  عرض السيرة الذاتية
-                </a>
-              )}
-
-              {selected.certificates_urls?.length > 0 && (
-                <div>
-                  <p className="text-sm font-semibold mb-2">الشهادات المرفقة</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selected.certificates_urls.map((url) => (
+              <div className="rounded-xl border border-border p-4 space-y-2">
+                <p className="text-sm font-semibold">المستندات والملفات</p>
+                <div className="flex flex-wrap gap-2">
+                  {selected.resume_url ? (
+                    <a href={selected.resume_url} target="_blank" rel="noreferrer" className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20">
+                      عرض السيرة الذاتية
+                    </a>
+                  ) : (
+                    <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">لا توجد سيرة ذاتية</span>
+                  )}
+                  {selected.certificates_urls?.length > 0 ? (
+                    selected.certificates_urls.map((url) => (
                       <a key={url} href={url} target="_blank" rel="noreferrer" className="rounded-full bg-muted px-3 py-1 text-xs hover:bg-muted/80">
                         شهادة
                       </a>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">لا توجد شهادات</span>
+                  )}
                 </div>
-              )}
+              </div>
 
               <div className="space-y-2">
                 <Label>ملاحظات الإدارة</Label>
@@ -366,6 +439,39 @@ function AdminTeacherRequestsPage() {
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const toneMap: Record<string, string> = {
+    pending: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    under_review: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
+    accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    needs_changes: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+    rejected: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+  };
+
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${toneMap[status] || "bg-muted text-muted-foreground"}`}>
+      {statusLabel[status] || status}
+    </span>
+  );
+}
+
+function SummaryCard({ title, value, tone }: { title: string; value: number; tone: "default" | "pending" | "success" | "warning" | "danger" }) {
+  const toneClasses: Record<typeof tone, string> = {
+    default: "border-border bg-background",
+    pending: "border-amber-500/30 bg-amber-500/10",
+    success: "border-emerald-500/30 bg-emerald-500/10",
+    warning: "border-violet-500/30 bg-violet-500/10",
+    danger: "border-rose-500/30 bg-rose-500/10",
+  };
+
+  return (
+    <div className={`rounded-2xl border p-4 ${toneClasses[tone]}`}>
+      <p className="text-sm text-muted-foreground">{title}</p>
+      <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
     </div>
   );
 }

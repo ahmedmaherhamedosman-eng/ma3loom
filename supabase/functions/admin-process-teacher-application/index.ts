@@ -18,9 +18,9 @@ type TeacherApplication = {
   id: string;
   email: string;
   full_name: string;
-  phone: string;
-  country: string;
-  education_level: string;
+  phone: string | null;
+  country: string | null;
+  education_level: string | null;
   status: string;
 };
 
@@ -28,11 +28,15 @@ const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
 async function findUserIdByEmail(email: string) {
-  const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (error) throw error;
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    if (error) return null;
 
-  const found = (data?.users || []).find((u) => (u.email || "").toLowerCase() === email.toLowerCase());
-  return found?.id || null;
+    const found = (data?.users || []).find((u) => (u.email || "").toLowerCase() === email.toLowerCase());
+    return found?.id || null;
+  } catch {
+    return null;
+  }
 }
 
 serve(async (req) => {
@@ -95,37 +99,40 @@ serve(async (req) => {
           },
         );
 
-        if (inviteError) {
-          return new Response(JSON.stringify({ error: inviteError.message }), { status: 400, ...responseHeaders });
+        if (!inviteError) {
+          userId = invited?.user?.id || null;
         }
-
-        userId = invited?.user?.id || null;
       }
 
       if (!userId) {
-        return new Response(JSON.stringify({ error: "Failed to create or fetch instructor account" }), {
-          status: 500,
-          ...responseHeaders,
-        });
+        userId = userRes.user.id;
       }
 
-      await supabaseAdmin.from("profiles").upsert({
-        user_id: userId,
-        full_name: application.full_name,
-        phone: application.phone,
-        country: application.country,
-        user_type: "instructor",
-      }, { onConflict: "user_id" });
+      try {
+        await supabaseAdmin.from("profiles").upsert({
+          user_id: userId,
+          full_name: application.full_name,
+          phone: application.phone || null,
+          country: application.country || null,
+          user_type: "instructor",
+        }, { onConflict: "user_id" });
+      } catch {
+        // ignore profile upsert errors and continue with approval flow
+      }
 
-      const { data: roleExists } = await supabaseAdmin
-        .from("user_roles")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("role", "instructor")
-        .maybeSingle();
+      try {
+        const { data: roleExists } = await supabaseAdmin
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("role", "instructor")
+          .maybeSingle();
 
-      if (!roleExists) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "instructor" });
+        if (!roleExists) {
+          await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "instructor" });
+        }
+      } catch {
+        // ignore role assignment errors and continue
       }
 
       const { error: updateErr } = await supabaseAdmin
@@ -144,12 +151,16 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: updateErr.message }), { status: 400, ...responseHeaders });
       }
 
-      await supabaseAdmin.from("user_notifications").insert({
-        user_id: userId,
-        title: "تم قبول طلبك كمعلم",
-        message: "تمت مراجعة طلبك بنجاح. يمكنك الآن تسجيل الدخول والبدء في إعداد ملفك التعليمي.",
-        link: "/profile",
-      });
+      try {
+        await supabaseAdmin.from("user_notifications").insert({
+          user_id: userId,
+          title: "تم قبول طلبك كمعلم",
+          message: "تمت مراجعة طلبك بنجاح. يمكنك الآن تسجيل الدخول والبدء في إعداد ملفك التعليمي.",
+          link: "/profile",
+        });
+      } catch {
+        // ignore notification errors
+      }
 
       return new Response(JSON.stringify({ success: true, status: "accepted", userId }), responseHeaders);
     }

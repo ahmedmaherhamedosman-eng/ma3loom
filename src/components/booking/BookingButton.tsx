@@ -16,13 +16,7 @@ export default function BookingButton({ pkgId, title, price, children }: Booking
 
   const handleClick = () => {
     const confirmPath = `/private-lessons/confirm?packageId=${encodeURIComponent(pkgId)}`
-    if (!isAuthenticated) {
-      const redirect = encodeURIComponent(confirmPath)
-      window.location.assign(`/login?redirect=${redirect}`)
-      return
-    }
-
-    // user is authenticated -> navigate to confirm booking page
+    // Always navigate to the confirmation page. Do not force login at button click.
     window.location.assign(confirmPath)
   }
 

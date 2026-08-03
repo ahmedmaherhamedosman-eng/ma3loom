@@ -32,12 +32,7 @@ export default function BookingWizard({ open, onOpenChange, packageId, packageTi
   }, [open])
 
   const ensureAuthThenNext = () => {
-    if (!isAuthenticated) {
-      // redirect to login with the parameter expected by the login route
-      const redirect = encodeURIComponent(window.location.pathname + window.location.search)
-      window.location.assign(`/login?redirect=${redirect}`)
-      return
-    }
+    // Proceed to next step even when unauthenticated; do not force-login here.
     setStep(2)
   }
 
