@@ -37,6 +37,37 @@ create table if not exists public.private_lesson_packages (
   refund_policy text
 );
 
+-- Upgrade the legacy packages table when it already exists from an older schema.
+alter table public.private_lesson_packages
+  add column if not exists updated_at timestamptz not null default now(),
+  add column if not exists short_description text,
+  add column if not exists full_description text,
+  add column if not exists icon text,
+  add column if not exists color_key text not null default 'primary',
+  add column if not exists duration_minutes integer not null default 60,
+  add column if not exists sessions_count integer not null default 1,
+  add column if not exists support_type text not null default 'standard',
+  add column if not exists includes_followup boolean not null default false,
+  add column if not exists includes_homework boolean not null default false,
+  add column if not exists includes_reports boolean not null default false,
+  add column if not exists includes_tests boolean not null default false,
+  add column if not exists includes_summaries boolean not null default false,
+  add column if not exists includes_question_bank boolean not null default false,
+  add column if not exists includes_certificate boolean not null default false,
+  add column if not exists includes_priority_booking boolean not null default false,
+  add column if not exists includes_reschedule boolean not null default true,
+  add column if not exists includes_tech_support boolean not null default true,
+  add column if not exists feature_list text[] not null default '{}',
+  add column if not exists old_price numeric(10,2),
+  add column if not exists discount_percent integer not null default 0,
+  add column if not exists seats_limit integer,
+  add column if not exists seats_remaining integer,
+  add column if not exists image_url text,
+  add column if not exists is_featured boolean not null default false,
+  add column if not exists sort_order integer not null default 0,
+  add column if not exists cancellation_policy text,
+  add column if not exists refund_policy text;
+
 create table if not exists public.private_lesson_bookings (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),

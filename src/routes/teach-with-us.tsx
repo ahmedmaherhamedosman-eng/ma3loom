@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -93,6 +93,18 @@ function TeachWithUsPage() {
   const [certificates, setCertificates] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setIsAuthenticated(Boolean(session));
+      setAuthLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
 
   const requiredMissing = useMemo(() => {
     const required = [
@@ -126,6 +138,13 @@ function TeachWithUsPage() {
 
     if (!form.termsAccepted) {
       toast.error("يجب الموافقة على الشروط والأحكام");
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("يجب تسجيل الدخول أولًا لتقديم طلب الانضمام كمعلم");
+      setIsAuthenticated(false);
       return;
     }
 
@@ -215,6 +234,25 @@ function TeachWithUsPage() {
           </div>
         </motion.section>
 
+        {authLoading ? (
+          <div className="rounded-3xl border border-border glass p-10 text-center text-muted-foreground">جارٍ التحقق من تسجيل الدخول...</div>
+        ) : !isAuthenticated ? (
+          <section className="rounded-3xl border border-primary/15 bg-card p-8 md:p-12 text-center shadow-elegant">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl gradient-hero text-3xl text-primary-foreground">👨‍🏫</div>
+            <h2 className="text-2xl font-extrabold text-foreground mb-3">سجّل دخولك أولًا</h2>
+            <p className="mx-auto max-w-lg text-muted-foreground leading-7 mb-7">
+              يلزم إنشاء حساب أو تسجيل الدخول إلى منصة معلوم قبل تقديم طلب الانضمام كمعلم.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link to="/login" search={{ redirect: "/teach-with-us" }}>
+                <Button variant="hero" size="lg">تسجيل الدخول</Button>
+              </Link>
+              <Link to="/signup">
+                <Button variant="outline" size="lg">إنشاء حساب جديد</Button>
+              </Link>
+            </div>
+          </section>
+        ) : (
         <form onSubmit={handleSubmit} className="rounded-3xl border border-border glass p-6 md:p-8 space-y-8">
           <section className="grid md:grid-cols-2 gap-4">
             <Field label="الاسم الكامل*">
@@ -347,6 +385,7 @@ function TeachWithUsPage() {
             </motion.div>
           )}
         </form>
+        )}
       </div>
     </div>
   );

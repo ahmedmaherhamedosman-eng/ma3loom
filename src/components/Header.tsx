@@ -13,12 +13,13 @@ import type { User } from "@supabase/supabase-js";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useInstructor } from "@/hooks/useInstructor";
 import { useCart } from "@/hooks/useCart";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Primary nav (always visible)
 const primaryLinks = [
   { to: "/", label: "الرئيسية" },
   { to: "/courses", label: "الكورسات" },
-  { to: "/live-classes", label: "حصص مباشرة" },
+  { to: "/private-lessons", label: "حصص خصوصية" },
   { to: "/blog", label: "المدونة" },
   { to: "/contact", label: "تواصل معنا" },
 ] as const;
@@ -58,28 +59,28 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 glass-strong border-b border-border/60">
+    <header className="sticky top-0 z-50 border-b border-border/50 bg-card/75 backdrop-blur-2xl shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
+        <div className="flex h-[4.5rem] sm:h-20 items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center shrink-0 group" aria-label="معلوم">
+          <Link to="/" className="brand-logo-orbit flex items-center shrink-0 group" aria-label="معلوم">
             <img
               src="/logo.png"
               alt="معلوم"
-              className="h-10 w-10 sm:h-14 sm:w-14 md:h-20 md:w-20 object-contain transition-transform group-hover:scale-105"
+              className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1 rounded-2xl border border-border/60 bg-muted/35 p-1">
             {primaryLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   location.pathname === link.to
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/80"
                 }`}
               >
                 {link.label}
@@ -88,17 +89,17 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
+                  className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1 ${
                     moreLinks.some((l) => l.to === location.pathname)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-card text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/80"
                   }`}
                 >
                   المزيد
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
+              <DropdownMenuContent align="end" className="w-56 bg-popover/95 backdrop-blur-xl z-50 rounded-2xl border-border/60 shadow-elevated p-1.5">
                 {moreLinks.map((link) => (
                   <DropdownMenuItem key={link.to} asChild>
                     <Link
@@ -117,6 +118,7 @@ export function Header() {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             {user && (
               <Link to="/cart" className="relative p-2 rounded-lg hover:bg-muted transition-colors" title="سلة الشراء">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -216,6 +218,9 @@ export function Header() {
                 </Link>
               </>
             )}
+            <div className="flex justify-center px-4 pt-3">
+              <ThemeToggle />
+            </div>
             <div className="flex gap-2 pt-2 px-4">
               {user ? (
                 <Link to="/profile" className="flex-1" onClick={() => setMobileOpen(false)}>

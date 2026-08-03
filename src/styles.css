@@ -1,10 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  /* Radius scale (8px system rounded) */
+/* ============================================================
+   LIGHT MODE — Ma3loom brand identity
+   Deep royal indigo (knowledge, trust) + luminous ember orange
+   (intelligence, energy). All tokens tuned for WCAG AA.
+   ============================================================ */
+:root {
+  --radius: 0.875rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -12,8 +15,10 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cairo", ui-sans-serif, system-ui, sans-serif;
 
-  /* Semantic colors → mapped from :root vars below */
+  /* Semantic theme tokens for Tailwind utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -58,39 +63,27 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
-  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Cairo", ui-sans-serif, system-ui, sans-serif;
-}
-
-/* ============================================================
-   LIGHT MODE — Ma3loom brand identity
-   Deep royal indigo (knowledge, trust) + luminous ember orange
-   (intelligence, energy). All tokens tuned for WCAG AA.
-   ============================================================ */
-:root {
-  --radius: 0.875rem;
-
   /* Surfaces */
-  --background: oklch(0.985 0.005 260);
-  --foreground: oklch(0.18 0.03 260);
+  --background: oklch(0.985 0.008 225);
+  --foreground: oklch(0.20 0.06 255);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.03 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.03 260);
 
   /* Brand — royal indigo */
-  --primary: oklch(0.42 0.18 262);
+  --primary: oklch(0.40 0.19 260);
   --primary-foreground: oklch(0.985 0.005 260);
-  --primary-glow: oklch(0.58 0.19 258);
+  --primary-glow: oklch(0.66 0.16 220);
 
   /* Support */
-  --secondary: oklch(0.955 0.025 260);
-  --secondary-foreground: oklch(0.30 0.12 262);
-  --muted: oklch(0.965 0.008 255);
-  --muted-foreground: oklch(0.48 0.03 258);
+  --secondary: oklch(0.95 0.028 220);
+  --secondary-foreground: oklch(0.30 0.12 250);
+  --muted: oklch(0.965 0.012 225);
+  --muted-foreground: oklch(0.48 0.04 240);
 
   /* Accent — ember orange */
-  --accent: oklch(0.72 0.19 52);
+  --accent: oklch(0.74 0.20 55);
   --accent-foreground: oklch(0.99 0.01 60);
   --accent-glow: oklch(0.80 0.18 62);
 
@@ -101,17 +94,17 @@
   --success-foreground: oklch(0.985 0.005 155);
   --info: oklch(0.60 0.14 230);
   --info-foreground: oklch(0.985 0.005 230);
-  --warm: oklch(0.72 0.19 52);
+  --warm: oklch(0.74 0.20 55);
   --warm-foreground: oklch(0.99 0.01 60);
 
   /* Structural */
-  --border: oklch(0.92 0.012 258);
-  --input: oklch(0.92 0.012 258);
-  --ring: oklch(0.42 0.18 262);
+  --border: oklch(0.91 0.02 225);
+  --input: oklch(0.91 0.02 225);
+  --ring: oklch(0.66 0.16 220);
 
   /* Gradients */
-  --hero-gradient-start: oklch(0.42 0.18 262);
-  --hero-gradient-end: oklch(0.55 0.18 240);
+  --hero-gradient-start: oklch(0.35 0.18 262);
+  --hero-gradient-end: oklch(0.58 0.17 225);
 
   /* Charts — distinct hues from brand palette */
   --chart-1: oklch(0.42 0.18 262);
@@ -204,6 +197,48 @@
   --shadow-glow-accent: 0 12px 40px -12px oklch(0.76 0.19 55 / 0.45);
 }
 
+.theme-sky {
+  --background: oklch(0.96 0.03 210);
+  --foreground: oklch(0.18 0.05 220);
+  --card: oklch(0.99 0.005 220);
+  --card-foreground: oklch(0.18 0.05 220);
+  --popover: oklch(0.99 0.005 220);
+  --popover-foreground: oklch(0.18 0.05 220);
+  --secondary: oklch(0.97 0.02 210);
+  --secondary-foreground: oklch(0.24 0.07 220);
+  --muted: oklch(0.97 0.01 210);
+  --muted-foreground: oklch(0.48 0.04 220);
+  --border: oklch(0.88 0.02 210);
+  --input: oklch(0.92 0.015 210);
+  --ring: oklch(0.60 0.15 215);
+  --hero-gradient-start: oklch(0.24 0.16 215);
+  --hero-gradient-end: oklch(0.74 0.20 210);
+  --sidebar: oklch(0.96 0.02 210);
+  --sidebar-foreground: oklch(0.18 0.05 220);
+  --sidebar-border: oklch(0.90 0.02 210);
+}
+
+.theme-sunset {
+  --background: oklch(0.96 0.04 45);
+  --foreground: oklch(0.16 0.05 30);
+  --card: oklch(0.99 0.01 40);
+  --card-foreground: oklch(0.18 0.05 30);
+  --popover: oklch(0.99 0.01 40);
+  --popover-foreground: oklch(0.18 0.05 30);
+  --secondary: oklch(0.95 0.03 45);
+  --secondary-foreground: oklch(0.28 0.08 35);
+  --muted: oklch(0.96 0.02 45);
+  --muted-foreground: oklch(0.40 0.05 35);
+  --border: oklch(0.88 0.02 45);
+  --input: oklch(0.92 0.01 45);
+  --ring: oklch(0.72 0.18 50);
+  --hero-gradient-start: oklch(0.85 0.18 45);
+  --hero-gradient-end: oklch(0.60 0.17 270);
+  --sidebar: oklch(0.97 0.02 45);
+  --sidebar-foreground: oklch(0.16 0.05 30);
+  --sidebar-border: oklch(0.92 0.01 45);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -222,8 +257,8 @@
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     background-image:
-      radial-gradient(ellipse 80% 60% at 90% -10%, oklch(0.72 0.19 52 / 0.06), transparent 60%),
-      radial-gradient(ellipse 70% 60% at 10% 0%, oklch(0.42 0.18 262 / 0.08), transparent 55%);
+      radial-gradient(ellipse 80% 60% at 90% -10%, oklch(0.74 0.20 55 / 0.08), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 10% 0%, oklch(0.66 0.16 220 / 0.10), transparent 55%);
     background-attachment: fixed;
   }
 
@@ -272,13 +307,45 @@
 @layer utilities {
   /* Gradients */
   .gradient-hero {
-    background: linear-gradient(135deg, var(--color-hero-gradient-start), var(--color-hero-gradient-end));
+    background:
+      radial-gradient(circle at 83% 16%, oklch(0.74 0.20 55 / 0.28), transparent 24%),
+      radial-gradient(circle at 12% 84%, oklch(0.66 0.16 220 / 0.42), transparent 34%),
+      linear-gradient(135deg, var(--color-hero-gradient-start), var(--color-hero-gradient-end));
+  }
+
+  /* Homepage composition inspired by the Ma3loom brand: open space, knowledge, and lift-off. */
+  .hero-reference {
+    background:
+      radial-gradient(circle at 18% 20%, oklch(0.66 0.16 220 / 0.12), transparent 25%),
+      radial-gradient(circle at 76% 76%, oklch(0.74 0.20 55 / 0.12), transparent 24%),
+      linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.985 0.012 225) 100%);
+  }
+  .hero-logo-frame::after {
+    content: "";
+    position: absolute;
+    inset: auto 8% 4% auto;
+    width: 36%;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: radial-gradient(circle, oklch(0.74 0.20 55 / 0.16), transparent 68%);
+    pointer-events: none;
+  }
+  .home-stats-ribbon {
+    background:
+      radial-gradient(circle at 12% 130%, oklch(0.66 0.16 220 / 0.38), transparent 45%),
+      linear-gradient(115deg, oklch(0.32 0.18 262), oklch(0.40 0.19 260));
+  }
+  .home-stat-value {
+    color: white;
+  }
+  .home-stat-label {
+    color: oklch(0.97 0.01 230 / 0.82);
   }
   .gradient-warm {
     background: linear-gradient(135deg, var(--color-warm), oklch(0.65 0.22 35));
   }
   .gradient-brand {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-glow) 55%, var(--color-accent) 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-glow) 58%, var(--color-accent) 100%);
   }
   .gradient-mesh {
     background:
@@ -339,6 +406,33 @@
     background-size: 20px 20px;
   }
 
+  /* Brand device: the book-to-rocket motion of the Ma3loom mark. */
+  .brand-logo-orbit {
+    position: relative;
+    isolation: isolate;
+  }
+  .brand-logo-orbit::before {
+    content: "";
+    position: absolute;
+    inset: -0.4rem;
+    z-index: -1;
+    border-radius: 1.25rem;
+    background: conic-gradient(from 210deg, var(--color-primary), var(--color-primary-glow), var(--color-warm), var(--color-primary));
+    opacity: 0.18;
+    filter: blur(8px);
+    transition: opacity 250ms ease, transform 250ms ease;
+  }
+  .brand-logo-orbit:hover::before {
+    opacity: 0.42;
+    transform: rotate(12deg) scale(1.06);
+  }
+
+  .brand-flight-lines {
+    background-image:
+      linear-gradient(120deg, transparent 0 42%, color-mix(in oklab, var(--color-primary-glow) 38%, transparent) 42.2% 42.8%, transparent 43% 100%),
+      linear-gradient(120deg, transparent 0 54%, color-mix(in oklab, var(--color-warm) 32%, transparent) 54.2% 54.8%, transparent 55% 100%);
+  }
+
   /* Interactive helpers */
   .hover-scale { transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1); }
   .hover-scale:hover { transform: scale(1.03); }
@@ -392,4 +486,34 @@
     50% { box-shadow: 0 0 0 12px color-mix(in oklab, var(--color-primary) 0%, transparent); }
   }
   .animate-glow { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+  /* Consistent product surfaces across dashboards, forms, and content pages. */
+  .surface-panel {
+    border: 1px solid color-mix(in oklab, var(--color-border) 78%, transparent);
+    background: color-mix(in oklab, var(--color-card) 88%, transparent);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid color-mix(in oklab, var(--color-primary) 18%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+    color: var(--color-primary);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

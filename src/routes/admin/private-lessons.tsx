@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import type { Database } from '@/integrations/supabase/types'
 import { 
   Package, CalendarCheck, Users, DollarSign, Plus, Edit, Trash2, Loader2, X 
 } from 'lucide-react'
@@ -9,10 +10,14 @@ export const Route = createFileRoute('/admin/private-lessons')({
   component: AdminPrivateLessonsDashboard,
 })
 
-export default function AdminPrivateLessonsDashboard() {
+type PrivateLessonPackage = Database['public']['Tables']['private_lesson_packages']['Row']
+type PrivateLessonPackagePayload = Database['public']['Tables']['private_lesson_packages']['Insert']
+type PrivateLessonBooking = Database['public']['Tables']['private_lesson_bookings']['Row']
+
+function AdminPrivateLessonsDashboard() {
   const [activeTab, setActiveTab] = useState<'packages' | 'bookings'>('packages')
-  const [packages, setPackages] = useState<any[]>([])
-  const [bookings, setBookings] = useState<any[]>([])
+  const [packages, setPackages] = useState<PrivateLessonPackage[]>([])
+  const [bookings, setBookings] = useState<PrivateLessonBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -25,13 +30,12 @@ export default function AdminPrivateLessonsDashboard() {
     slug: '',
     name: '',
     badge: '',
-    description: '',
+    short_description: '',
     price: '',
-    currency: 'ر.س',
-    period: 'شهرياً',
-    saving: '',
+    duration_minutes: '60',
+    sessions_count: '1',
     featuresText: '',
-    is_popular: false,
+    is_featured: false,
     is_active: true
   })
 
@@ -68,32 +72,30 @@ export default function AdminPrivateLessonsDashboard() {
       slug: '',
       name: '',
       badge: '',
-      description: '',
+      short_description: '',
       price: '',
-      currency: 'ر.س',
-      period: 'شهرياً',
-      saving: '',
+      duration_minutes: '60',
+      sessions_count: '1',
       featuresText: '',
-      is_popular: false,
+      is_featured: false,
       is_active: true
     })
     setIsModalOpen(true)
   }
 
   // فتح نافذة التعديل
-  const handleOpenEditModal = (pkg: any) => {
+  const handleOpenEditModal = (pkg: PrivateLessonPackage) => {
     setEditingPackageId(pkg.id)
     setFormData({
       slug: pkg.slug || '',
-      name: pkg.name || pkg.title || '',
+      name: pkg.name,
       badge: pkg.badge || '',
-      description: pkg.description || '',
+      short_description: pkg.short_description || '',
       price: pkg.price ? String(pkg.price) : '',
-      currency: pkg.currency || 'ر.س',
-      period: pkg.period || '',
-      saving: pkg.saving || '',
-      featuresText: Array.isArray(pkg.features) ? pkg.features.join('\n') : '',
-      is_popular: pkg.is_popular || false,
+      duration_minutes: String(pkg.duration_minutes || 60),
+      sessions_count: String(pkg.sessions_count || 1),
+      featuresText: Array.isArray(pkg.feature_list) ? pkg.feature_list.join('\n') : '',
+      is_featured: pkg.is_featured || false,
       is_active: pkg.is_active ?? true
     })
     setIsModalOpen(true)
@@ -109,17 +111,16 @@ export default function AdminPrivateLessonsDashboard() {
       .map(f => f.trim())
       .filter(f => f.length > 0)
 
-    const payload: any = {
+    const payload: PrivateLessonPackagePayload = {
       slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
       name: formData.name,
       badge: formData.badge || null,
-      description: formData.description || null,
+      short_description: formData.short_description || null,
       price: parseFloat(formData.price) || 0,
-      currency: formData.currency || 'ر.س',
-      period: formData.period || 'شهرياً',
-      saving: formData.saving || null,
-      features: featuresArray,
-      is_popular: formData.is_popular,
+      duration_minutes: parseInt(formData.duration_minutes, 10) || 60,
+      sessions_count: parseInt(formData.sessions_count, 10) || 1,
+      feature_list: featuresArray,
+      is_featured: formData.is_featured,
       is_active: formData.is_active
     }
 
@@ -141,8 +142,8 @@ export default function AdminPrivateLessonsDashboard() {
 
       setIsModalOpen(false)
       fetchData()
-    } catch (err: any) {
-      alert('حدث خطأ أثناء حفظ الباقة: ' + err.message)
+    } catch (err: unknown) {
+      alert('حدث خطأ أثناء حفظ الباقة: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'))
     } finally {
       setSaving(false)
     }
@@ -160,8 +161,8 @@ export default function AdminPrivateLessonsDashboard() {
 
       if (error) throw error
       fetchData()
-    } catch (err: any) {
-      alert('حدث خطأ أثناء الحذف: ' + err.message)
+    } catch (err: unknown) {
+      alert('حدث خطأ أثناء الحذف: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'))
     }
   }
 
@@ -229,7 +230,7 @@ export default function AdminPrivateLessonsDashboard() {
           <div>
             <p className="text-xs font-semibold text-slate-500">الحجوزات النشطة</p>
             <p className="text-xl font-black mt-0.5">
-              {bookings.filter(b => b.status === 'confirmed').length}
+              {bookings.filter((booking) => booking.booking_status === 'confirmed').length}
             </p>
           </div>
         </div>
@@ -286,14 +287,14 @@ export default function AdminPrivateLessonsDashboard() {
                 ) : (
                   packages.map((pkg) => (
                     <tr key={pkg.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">{pkg.name || pkg.title}</td>
+                      <td className="p-4 font-bold text-slate-900 dark:text-white">{pkg.name}</td>
                       <td className="p-4">
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                           {pkg.badge || 'عادي'}
                         </span>
                       </td>
-                      <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{pkg.price} {pkg.currency}</td>
-                      <td className="p-4 text-slate-500">{pkg.period}</td>
+                      <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{pkg.price} ر.س</td>
+                      <td className="p-4 text-slate-500">{pkg.sessions_count} حصة · {pkg.duration_minutes} دقيقة</td>
                       <td className="p-4 text-center">
                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${pkg.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
                           {pkg.is_active ? 'مُفعلة' : 'معطلة'}
@@ -351,7 +352,7 @@ export default function AdminPrivateLessonsDashboard() {
                       <td className="p-4 font-bold text-emerald-600">{b.total_amount} ر.س</td>
                       <td className="p-4 text-center">
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                          {b.status}
+                          {b.booking_status}
                         </span>
                       </td>
                     </tr>
@@ -420,12 +421,12 @@ export default function AdminPrivateLessonsDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold mb-1">المدة / الفترة</label>
+                  <label className="block text-xs font-bold mb-1">مدة الحصة (دقيقة)</label>
                   <input 
-                    type="text" 
-                    value={formData.period} 
-                    onChange={e => setFormData({...formData, period: e.target.value})}
-                    placeholder="شهرياً / لكل حصة"
+                    type="number" min="1"
+                    value={formData.duration_minutes}
+                    onChange={e => setFormData({...formData, duration_minutes: e.target.value})}
+                    placeholder="60"
                     className="w-full px-3 py-2 text-xs border rounded-xl dark:bg-slate-800 dark:border-slate-700"
                   />
                 </div>
@@ -444,12 +445,12 @@ export default function AdminPrivateLessonsDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold mb-1">نسبة التوفير (اختياري)</label>
+                  <label className="block text-xs font-bold mb-1">عدد الحصص</label>
                   <input 
-                    type="text" 
-                    value={formData.saving} 
-                    onChange={e => setFormData({...formData, saving: e.target.value})}
-                    placeholder="توفير 20%"
+                    type="number" min="1"
+                    value={formData.sessions_count}
+                    onChange={e => setFormData({...formData, sessions_count: e.target.value})}
+                    placeholder="1"
                     className="w-full px-3 py-2 text-xs border rounded-xl dark:bg-slate-800 dark:border-slate-700"
                   />
                 </div>
@@ -459,8 +460,8 @@ export default function AdminPrivateLessonsDashboard() {
                 <label className="block text-xs font-bold mb-1">الوصف</label>
                 <textarea 
                   rows={2}
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})}
+                  value={formData.short_description}
+                  onChange={e => setFormData({...formData, short_description: e.target.value})}
                   placeholder="وصف مختصر للباقة..."
                   className="w-full px-3 py-2 text-xs border rounded-xl dark:bg-slate-800 dark:border-slate-700"
                 />
@@ -481,8 +482,8 @@ export default function AdminPrivateLessonsDashboard() {
                 <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
                   <input 
                     type="checkbox" 
-                    checked={formData.is_popular}
-                    onChange={e => setFormData({...formData, is_popular: e.target.checked})}
+                    checked={formData.is_featured}
+                    onChange={e => setFormData({...formData, is_featured: e.target.checked})}
                     className="rounded text-blue-600"
                   />
                   <span>تمييز كـ "الأكثر شعبية"</span>

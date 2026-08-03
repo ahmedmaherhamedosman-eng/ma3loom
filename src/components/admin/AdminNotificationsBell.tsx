@@ -9,7 +9,10 @@ import { toast } from "sonner";
 // Light "ding" using WebAudio — no asset needed
 function playDing() {
   try {
-    const audioWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
+    const audioWindow = window as Window & {
+      AudioContext?: typeof AudioContext;
+      webkitAudioContext?: typeof AudioContext;
+    };
     const Ctx = audioWindow.AudioContext || audioWindow.webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();

@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/hooks/useCart";
+import { SelectedPackageProvider } from '@/context/SelectedPackageContext'
 import { Toaster } from "@/components/ui/sonner";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -80,6 +81,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <CartProvider>
+      <SelectedPackageProvider>
       <PaymentTestModeBanner />
       <Header />
       <main>
@@ -88,6 +90,7 @@ function RootComponent() {
       <Footer />
       <WhatsAppButton />
       <Toaster position="top-center" richColors />
+      </SelectedPackageProvider>
     </CartProvider>
   );
 }

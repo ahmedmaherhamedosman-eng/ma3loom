@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { CalendarDays, Clock3, HelpCircle, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BookingButton from "@/components/booking/BookingButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,9 +155,11 @@ function PrivateLessonPackageDetails() {
               <p className="text-3xl font-extrabold text-foreground">{pkg.price} <span className="text-sm">ر.س</span></p>
             </div>
 
-            <a href={checkoutHref}>
-              <Button size="lg" className={`w-full bg-gradient-to-l ${theme.cta} text-white`}>احجز الآن</Button>
-            </a>
+            <BookingButton pkgId={pkg.id} title={pkg.name} price={pkg.price}>
+              <span className={`w-full block text-center py-3.5 font-bold ${"text-white"}`}>
+                احجز الآن
+              </span>
+            </BookingButton>
 
             <Link to="/private-lessons" className="mt-3 block text-center text-sm text-primary hover:underline">العودة إلى جميع الباقات</Link>
           </section>

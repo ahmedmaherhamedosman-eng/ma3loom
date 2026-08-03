@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/CourseCard";
 import { EliteTeachersSection } from "@/components/EliteTeachersSection";
+import PrivateLessonsSection from "@/components/PrivateLessonsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { type TeacherProfileRow } from "@/lib/teachers";
-import heroImage from "@/assets/hero-students.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -131,61 +132,61 @@ function HomePage() {
   }, []);
 
   return (
-    <div>
+    <div className="overflow-hidden">
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="gradient-hero relative">
+      <section className="relative isolate overflow-hidden">
+        <div className="hero-reference relative min-h-[650px] lg:min-h-[720px] flex items-center">
           {/* Decorative background blobs */}
-          <div className="absolute top-0 -start-20 w-96 h-96 bg-warm/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 -end-20 w-[28rem] h-[28rem] bg-primary-foreground/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_50%)] pointer-events-none" />
+          <div className="absolute top-0 -start-20 w-96 h-96 bg-warm/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
+          <div className="absolute bottom-0 -end-20 w-[34rem] h-[34rem] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute inset-0 opacity-40 bg-dots brand-flight-lines pointer-events-none" />
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 rounded-full px-4 py-2 mb-6">
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 lg:py-32 w-full">
+            <div className="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
+              <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
+                <div className="inline-flex items-center gap-2 bg-primary/5 backdrop-blur-md border border-primary/15 rounded-full px-4 py-2 mb-6 shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-warm animate-pulse" />
-                  <span className="text-primary-foreground/95 text-sm font-medium">
+                  <span className="text-primary text-sm font-bold">
                     منصة معلوم — تعلّم بدون حدود
                   </span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight mb-6">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-primary leading-[1.1] mb-7 tracking-tight">
                   تعلّم بلا حدود
                   <br />
                   <span className="text-warm drop-shadow-lg">مع معلوم</span>
                 </h1>
 
-                <p className="text-lg text-primary-foreground/85 leading-relaxed mb-8 max-w-lg">
+                <p className="text-lg sm:text-xl text-muted-foreground leading-8 mb-9 max-w-xl">
                   منصة تعليمية عربية متكاملة لطلاب المدارس والجامعات. كورسات في جميع التخصصات مع اختبارات وشهادات معتمدة.
                 </p>
 
                 <div className="flex flex-wrap gap-4">
                   <Link to="/courses">
-                    <Button variant="warm" size="xl" className="shadow-xl shadow-warm/30">تصفح الكورسات</Button>
+                    <Button variant="warm" size="xl" className="shadow-xl shadow-warm/30 transition-all hover:-translate-y-0.5 hover:shadow-warm/50">تصفح الكورسات</Button>
                   </Link>
                   <Link to="/signup">
-                    <Button variant="outline" size="xl" className="border-primary-foreground/40 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/15 backdrop-blur-sm">
+                    <Button variant="outline" size="xl" className="border-primary/25 bg-card/70 text-primary hover:bg-primary/5 backdrop-blur-sm">
                       سجّل مجاناً
                     </Button>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="relative hidden lg:block">
+              <motion.div initial={{ opacity: 0, scale: 0.96, x: -16 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.12, ease: "easeOut" }} className="relative hidden lg:block">
                 <div className="absolute -top-6 -end-6 w-24 h-24 bg-warm/30 rounded-2xl blur-2xl" />
-                <div className="absolute -bottom-6 -start-6 w-32 h-32 bg-primary-foreground/20 rounded-full blur-2xl" />
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-1 ring-primary-foreground/20">
-                  <img src={heroImage} alt="طلاب يتعلمون على منصة معلوم" width={1920} height={1080} className="w-full h-auto" />
+                <div className="absolute -bottom-6 -start-6 w-32 h-32 bg-primary/15 rounded-full blur-2xl" />
+                <div className="relative hero-logo-frame rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-primary/10 bg-card/85 p-4 backdrop-blur-sm">
+                  <img src="/logo.png" alt="شعار منصة معلوم التعليمية" width={1920} height={1080} className="w-full h-auto rounded-[1.6rem] object-contain" />
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-14 bg-card border-b border-border">
+      <section className="home-stats-ribbon relative z-10 -mt-10 mx-4 sm:mx-6 lg:mx-auto lg:max-w-6xl rounded-3xl shadow-elevated border border-primary/20 py-8 sm:py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 gap-8">
             {[
@@ -194,10 +195,10 @@ function HomePage() {
               { value: stats.lessons, label: "درس تعليمي" },
             ].map((stat, idx) => (
               <div key={idx} className="text-center group">
-                <p className="text-3xl md:text-5xl font-extrabold text-gradient mb-2 transition-transform group-hover:scale-105">
+                <p className="home-stat-value text-3xl md:text-5xl font-extrabold mb-2 transition-transform group-hover:scale-105">
                   {stat.value.toLocaleString("ar-EG")}+
                 </p>
-                <p className="text-sm md:text-base text-muted-foreground font-medium">{stat.label}</p>
+                <p className="home-stat-label text-sm md:text-base font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -250,7 +251,7 @@ function HomePage() {
                       </div>
                     </div>
                     {s.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{s.description}</p>}
-                    <div className="mt-auto inline-flex items-center justify-center w-full h-9 px-4 rounded-md gradient-warm text-warm-foreground text-sm font-semibold">
+                    <div className="mt-auto inline-flex items-center justify-center w-full h-9 px-4 rounded-md bg-[linear-gradient(135deg,#0F3DDE,#1E6DFF)] text-white text-sm font-semibold">
                       احجز الآن {platform.icon}
                     </div>
                   </Link>
@@ -291,77 +292,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Online Tutoring Specialties */}
-      {specialties.length > 0 && (
-        <section className="py-20 lg:py-24 bg-gradient-to-br from-primary/8 via-warm/5 to-background relative overflow-hidden">
-          <div className="absolute top-20 -end-32 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-20 -start-32 w-80 h-80 bg-warm/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Online Tutoring Specialties removed per request */}
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-warm/15 text-warm-foreground rounded-full px-4 py-1.5 mb-4 ring-1 ring-warm/30">
-                <span className="text-sm font-bold">🎓 جديد</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-3">
-                حصص <span className="text-gradient">أونلاين</span> فردية
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                اطلب حصة خصوصية في التخصص اللي تحتاجه — من تحفيظ القرآن للرياضيات والبرمجة
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {specialties.map((s) => (
-                <Link
-                  key={s.id}
-                  to="/tutoring"
-                  className="bg-card rounded-2xl border border-border p-6 card-hover block group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl flex-shrink-0">{s.icon || "📚"}</div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-card-foreground mb-1.5 group-hover:text-primary transition-colors">
-                        {s.name}
-                      </h3>
-                      {s.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{s.description}</p>
-                      )}
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">السعر/الساعة</span>
-                        <span className="font-bold text-primary">
-                          {s.price_per_hour === 0 ? "حسب الاتفاق" : `${s.price_per_hour} ر.س`}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className="text-center mt-10">
-              <Link to="/tutoring">
-                <Button variant="hero" size="xl">📨 اطلب حصتك الآن</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section className="py-14 bg-gradient-to-l from-primary/10 via-warm/10 to-background">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-border/70 glass p-7 md:p-10 flex flex-col md:flex-row items-center justify-between gap-5">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-2">🎓 الحصص الخصوصية</h2>
-              <p className="text-muted-foreground max-w-2xl">
-                باقات احترافية مع نخبة المعلمين: حصة مفردة، أسبوعية، شهرية، ومكثفة للاستعداد للاختبارات.
-              </p>
-            </div>
-            <Link to="/private-lessons">
-              <Button variant="hero" size="xl">استعرض الباقات الآن</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <PrivateLessonsSection />
 
       <EliteTeachersSection teachers={teachers} />
 
@@ -399,7 +332,7 @@ function HomePage() {
                   students={course.students_count}
                   lessons={course.lessons_count}
                   price={course.price === 0 ? "مجاني" : course.price}
-                  currency={course.currency}
+                  currency={course.currency ?? undefined}
                   image={course.image_url || "/placeholder.svg"}
                   isEnrolled={enrolledIds.has(course.id)}
                 />

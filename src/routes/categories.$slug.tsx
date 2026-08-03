@@ -146,7 +146,7 @@ function CategoryPage() {
                 students={c.students_count}
                 lessons={c.lessons_count}
                 price={c.is_free || c.price === 0 ? "مجاني" : c.price}
-                currency={c.currency}
+                currency={c.currency ?? undefined}
                 image={c.image_url || ""}
                 rating={Number(c.rating_avg) || 0}
                 ratingCount={c.rating_count || 0}

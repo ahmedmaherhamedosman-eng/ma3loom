@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
 
 export const Route = createFileRoute("/admin/posts")({
-  head: () => ({ meta: [{ title: "إدارة المنشورات — معلوم" }] }),
+  head: () => ({ meta: [{ title: "إدارة المدونة — معلوم" }] }),
   component: AdminPosts,
 });
 
@@ -86,13 +86,13 @@ function AdminPosts() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">إدارة المنشورات</h1>
-        <Button variant="hero" onClick={() => { resetForm(); setShowForm(true); }}>+ منشور جديد</Button>
+        <h1 className="text-2xl font-bold text-foreground">إدارة المدونة</h1>
+        <Button variant="hero" onClick={() => { resetForm(); setShowForm(true); }}>+ مقال جديد</Button>
       </div>
 
       {showForm && (
         <div className="bg-card rounded-xl border border-border p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">{editingId ? "تعديل المنشور" : "منشور جديد"}</h2>
+          <h2 className="text-lg font-bold mb-4">{editingId ? "تعديل المقال" : "مقال جديد"}</h2>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>العنوان *</Label>

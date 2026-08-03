@@ -42,10 +42,13 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as TeachersTeacherIdRouteImport } from './routes/teachers.$teacherId'
 import { Route as QuizzesQuizIdRouteImport } from './routes/quizzes.$quizId'
 import { Route as PrivateLessonsSuccessRouteImport } from './routes/private-lessons.success'
+import { Route as PrivateLessonsConfirmRouteImport } from './routes/private-lessons.confirm'
 import { Route as PrivateLessonsCheckoutRouteImport } from './routes/private-lessons.checkout'
 import { Route as PrivateLessonsSlugRouteImport } from './routes/private-lessons.$slug'
 import { Route as PlayLeaderboardRouteImport } from './routes/play.leaderboard'
 import { Route as PlayGameIdRouteImport } from './routes/play.$gameId'
+import { Route as PaymentsSuccessRouteImport } from './routes/payments.success'
+import { Route as PaymentsCancelRouteImport } from './routes/payments.cancel'
 import { Route as InstructorPrivateLessonsRouteImport } from './routes/instructor/private-lessons'
 import { Route as InstructorLiveRouteImport } from './routes/instructor.live'
 import { Route as GamesGameIdRouteImport } from './routes/games.$gameId'
@@ -241,6 +244,11 @@ const PrivateLessonsSuccessRoute = PrivateLessonsSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => PrivateLessonsRoute,
 } as any)
+const PrivateLessonsConfirmRoute = PrivateLessonsConfirmRouteImport.update({
+  id: '/confirm',
+  path: '/confirm',
+  getParentRoute: () => PrivateLessonsRoute,
+} as any)
 const PrivateLessonsCheckoutRoute = PrivateLessonsCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -259,6 +267,16 @@ const PlayLeaderboardRoute = PlayLeaderboardRouteImport.update({
 const PlayGameIdRoute = PlayGameIdRouteImport.update({
   id: '/play/$gameId',
   path: '/play/$gameId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsSuccessRoute = PaymentsSuccessRouteImport.update({
+  id: '/payments/success',
+  path: '/payments/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsCancelRoute = PaymentsCancelRouteImport.update({
+  id: '/payments/cancel',
+  path: '/payments/cancel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstructorPrivateLessonsRoute =
@@ -455,10 +473,13 @@ export interface FileRoutesByFullPath {
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
   '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
+  '/payments/cancel': typeof PaymentsCancelRoute
+  '/payments/success': typeof PaymentsSuccessRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
   '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
   '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/confirm': typeof PrivateLessonsConfirmRoute
   '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
   '/teachers/$teacherId': typeof TeachersTeacherIdRoute
@@ -521,10 +542,13 @@ export interface FileRoutesByTo {
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
   '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
+  '/payments/cancel': typeof PaymentsCancelRoute
+  '/payments/success': typeof PaymentsSuccessRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
   '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
   '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/confirm': typeof PrivateLessonsConfirmRoute
   '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
   '/teachers/$teacherId': typeof TeachersTeacherIdRoute
@@ -590,10 +614,13 @@ export interface FileRoutesById {
   '/games/$gameId': typeof GamesGameIdRoute
   '/instructor/live': typeof InstructorLiveRoute
   '/instructor/private-lessons': typeof InstructorPrivateLessonsRoute
+  '/payments/cancel': typeof PaymentsCancelRoute
+  '/payments/success': typeof PaymentsSuccessRoute
   '/play/$gameId': typeof PlayGameIdRoute
   '/play/leaderboard': typeof PlayLeaderboardRoute
   '/private-lessons/$slug': typeof PrivateLessonsSlugRoute
   '/private-lessons/checkout': typeof PrivateLessonsCheckoutRoute
+  '/private-lessons/confirm': typeof PrivateLessonsConfirmRoute
   '/private-lessons/success': typeof PrivateLessonsSuccessRoute
   '/quizzes/$quizId': typeof QuizzesQuizIdRoute
   '/teachers/$teacherId': typeof TeachersTeacherIdRoute
@@ -660,10 +687,13 @@ export interface FileRouteTypes {
     | '/games/$gameId'
     | '/instructor/live'
     | '/instructor/private-lessons'
+    | '/payments/cancel'
+    | '/payments/success'
     | '/play/$gameId'
     | '/play/leaderboard'
     | '/private-lessons/$slug'
     | '/private-lessons/checkout'
+    | '/private-lessons/confirm'
     | '/private-lessons/success'
     | '/quizzes/$quizId'
     | '/teachers/$teacherId'
@@ -726,10 +756,13 @@ export interface FileRouteTypes {
     | '/games/$gameId'
     | '/instructor/live'
     | '/instructor/private-lessons'
+    | '/payments/cancel'
+    | '/payments/success'
     | '/play/$gameId'
     | '/play/leaderboard'
     | '/private-lessons/$slug'
     | '/private-lessons/checkout'
+    | '/private-lessons/confirm'
     | '/private-lessons/success'
     | '/quizzes/$quizId'
     | '/teachers/$teacherId'
@@ -794,10 +827,13 @@ export interface FileRouteTypes {
     | '/games/$gameId'
     | '/instructor/live'
     | '/instructor/private-lessons'
+    | '/payments/cancel'
+    | '/payments/success'
     | '/play/$gameId'
     | '/play/leaderboard'
     | '/private-lessons/$slug'
     | '/private-lessons/checkout'
+    | '/private-lessons/confirm'
     | '/private-lessons/success'
     | '/quizzes/$quizId'
     | '/teachers/$teacherId'
@@ -845,6 +881,8 @@ export interface RootRouteChildren {
   CertificatesCodeRoute: typeof CertificatesCodeRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRouteWithChildren
   GamesGameIdRoute: typeof GamesGameIdRoute
+  PaymentsCancelRoute: typeof PaymentsCancelRoute
+  PaymentsSuccessRoute: typeof PaymentsSuccessRoute
   PlayGameIdRoute: typeof PlayGameIdRoute
   PlayLeaderboardRoute: typeof PlayLeaderboardRoute
   QuizzesQuizIdRoute: typeof QuizzesQuizIdRoute
@@ -1093,6 +1131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateLessonsSuccessRouteImport
       parentRoute: typeof PrivateLessonsRoute
     }
+    '/private-lessons/confirm': {
+      id: '/private-lessons/confirm'
+      path: '/confirm'
+      fullPath: '/private-lessons/confirm'
+      preLoaderRoute: typeof PrivateLessonsConfirmRouteImport
+      parentRoute: typeof PrivateLessonsRoute
+    }
     '/private-lessons/checkout': {
       id: '/private-lessons/checkout'
       path: '/checkout'
@@ -1119,6 +1164,20 @@ declare module '@tanstack/react-router' {
       path: '/play/$gameId'
       fullPath: '/play/$gameId'
       preLoaderRoute: typeof PlayGameIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments/success': {
+      id: '/payments/success'
+      path: '/payments/success'
+      fullPath: '/payments/success'
+      preLoaderRoute: typeof PaymentsSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments/cancel': {
+      id: '/payments/cancel'
+      path: '/payments/cancel'
+      fullPath: '/payments/cancel'
+      preLoaderRoute: typeof PaymentsCancelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instructor/private-lessons': {
@@ -1388,12 +1447,14 @@ const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
 interface PrivateLessonsRouteChildren {
   PrivateLessonsSlugRoute: typeof PrivateLessonsSlugRoute
   PrivateLessonsCheckoutRoute: typeof PrivateLessonsCheckoutRoute
+  PrivateLessonsConfirmRoute: typeof PrivateLessonsConfirmRoute
   PrivateLessonsSuccessRoute: typeof PrivateLessonsSuccessRoute
 }
 
 const PrivateLessonsRouteChildren: PrivateLessonsRouteChildren = {
   PrivateLessonsSlugRoute: PrivateLessonsSlugRoute,
   PrivateLessonsCheckoutRoute: PrivateLessonsCheckoutRoute,
+  PrivateLessonsConfirmRoute: PrivateLessonsConfirmRoute,
   PrivateLessonsSuccessRoute: PrivateLessonsSuccessRoute,
 }
 
@@ -1445,6 +1506,8 @@ const rootRouteChildren: RootRouteChildren = {
   CertificatesCodeRoute: CertificatesCodeRoute,
   CoursesCourseIdRoute: CoursesCourseIdRouteWithChildren,
   GamesGameIdRoute: GamesGameIdRoute,
+  PaymentsCancelRoute: PaymentsCancelRoute,
+  PaymentsSuccessRoute: PaymentsSuccessRoute,
   PlayGameIdRoute: PlayGameIdRoute,
   PlayLeaderboardRoute: PlayLeaderboardRoute,
   QuizzesQuizIdRoute: QuizzesQuizIdRoute,
