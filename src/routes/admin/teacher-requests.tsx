@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Eye, CheckCircle2, XCircle, MessageSquareWarning, Trash2, Save, Search } from "lucide-react";
+import { Eye, CheckCircle2, XCircle, MessageSquareWarning, Trash2, Save, Sparkles, FileText, UserRound, Clock3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,14 @@ interface TeacherRequestRow extends TeacherProfileRow {
 }
 
 interface EditableFields {
+  full_name: string;
+  specialization: string;
+  teaching_subject: string;
+  years_experience: string;
+  city: string;
+  country: string;
+  profile_image_url: string;
+  bio_full: string;
   is_home_visible: boolean;
   display_order: string;
   badge: string;
@@ -43,6 +51,13 @@ interface EditableFields {
 }
 
 const STATUS_FILTERS = ["all", "pending", "under_review", "accepted", "needs_changes", "rejected"] as const;
+const statusStyles: Record<string, string> = {
+  pending: "border-amber-500/20 bg-amber-500/10 text-amber-700",
+  under_review: "border-sky-500/20 bg-sky-500/10 text-sky-700",
+  accepted: "border-emerald-500/20 bg-emerald-500/10 text-emerald-700",
+  rejected: "border-rose-500/20 bg-rose-500/10 text-rose-700",
+  needs_changes: "border-orange-500/20 bg-orange-500/10 text-orange-700",
+};
 
 function AdminTeacherRequestsPage() {
   const [rows, setRows] = useState<TeacherRequestRow[]>([]);
@@ -51,9 +66,16 @@ function AdminTeacherRequestsPage() {
   const [decisionReason, setDecisionReason] = useState("");
   const [reviewNotes, setReviewNotes] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
-  const [searchTerm, setSearchTerm] = useState("");
   const [saving, setSaving] = useState(false);
   const [editable, setEditable] = useState<EditableFields>({
+    full_name: "",
+    specialization: "",
+    teaching_subject: "",
+    years_experience: "0",
+    city: "",
+    country: "",
+    profile_image_url: "",
+    bio_full: "",
     is_home_visible: false,
     display_order: "1000",
     badge: "",
@@ -89,43 +111,40 @@ function AdminTeacherRequestsPage() {
     void load();
   }, [load]);
 
-  const stats = useMemo(() => {
-    const initial = {
-      total: rows.length,
-      pending: 0,
-      under_review: 0,
-      accepted: 0,
-      needs_changes: 0,
-      rejected: 0,
-    };
-
-    rows.forEach((row) => {
-      if (row.status in initial) {
-        initial[row.status as keyof typeof initial] += 1;
-      }
-    });
-
-    return initial;
-  }, [rows]);
-
   const filteredRows = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    return rows.filter((row) => {
-      const matchesStatus = statusFilter === "all" ? true : row.status === statusFilter;
-      if (!term) return matchesStatus;
-
-      const haystack = `${row.full_name} ${row.email} ${row.specialization} ${row.teaching_subject} ${row.city || ""} ${row.country || ""}`.toLowerCase();
-      return matchesStatus && haystack.includes(term);
-    });
-  }, [rows, statusFilter, searchTerm]);
+    if (statusFilter === "all") return rows;
+    return rows.filter((r) => r.status === statusFilter);
+  }, [rows, statusFilter]);
 
   const selected = useMemo(() => rows.find((r) => r.id === selectedId) || null, [rows, selectedId]);
+
+  const statusStats = useMemo(() => {
+    const counts = STATUS_FILTERS.filter((status) => status !== "all").reduce<Record<string, number>>((acc, status) => {
+      acc[status] = rows.filter((row) => row.status === status).length;
+      return acc;
+    }, {});
+
+    return [
+      { label: "إجمالي الطلبات", value: rows.length, tone: "bg-primary/10 text-primary" },
+      { label: "قيد الانتظار", value: counts.pending || 0, tone: "bg-amber-500/10 text-amber-700" },
+      { label: "تحت المراجعة", value: counts.under_review || 0, tone: "bg-sky-500/10 text-sky-700" },
+      { label: "بحاجة لتعديلات", value: counts.needs_changes || 0, tone: "bg-orange-500/10 text-orange-700" },
+    ];
+  }, [rows]);
 
   useEffect(() => {
     if (!selected) return;
     setDecisionReason(selected.decision_reason || "");
     setReviewNotes(selected.review_notes || "");
     setEditable({
+      full_name: selected.full_name || "",
+      specialization: selected.specialization || "",
+      teaching_subject: selected.teaching_subject || "",
+      years_experience: String(selected.years_experience || 0),
+      city: selected.city || "",
+      country: selected.country || "",
+      profile_image_url: selected.profile_image_url || "",
+      bio_full: selected.bio_full || "",
       is_home_visible: selected.is_home_visible,
       display_order: String(selected.display_order || 1000),
       badge: selected.badge || "",
@@ -142,22 +161,7 @@ function AdminTeacherRequestsPage() {
     if (!requestId) return;
 
     setSaving(true);
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      toast.error("تعذّرت العملية", { description: "لم يتم العثور على جلسة مستخدم نشطة." });
-      setSaving(false);
-      return;
-    }
-
     const { error } = await supabase.functions.invoke("admin-process-teacher-application", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: {
         applicationId: requestId,
         action,
@@ -182,6 +186,14 @@ function AdminTeacherRequestsPage() {
     const { error } = await supabase
       .from("teacher_applications")
       .update({
+        full_name: editable.full_name || null,
+        specialization: editable.specialization || null,
+        teaching_subject: editable.teaching_subject || null,
+        years_experience: Number(editable.years_experience) || 0,
+        city: editable.city || null,
+        country: editable.country || null,
+        profile_image_url: editable.profile_image_url || null,
+        bio_full: editable.bio_full || null,
         is_home_visible: editable.is_home_visible,
         display_order: Number(editable.display_order) || 1000,
         badge: editable.badge || null,
@@ -223,31 +235,35 @@ function AdminTeacherRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">طلبات المعلمين</h1>
-        <p className="text-sm text-muted-foreground mt-1">مراجعة الطلبات، القبول/الرفض، وإدارة الظهور في الرئيسية</p>
-      </div>
+      <div className="rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-background to-card p-5 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-primary/15 p-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">طلبات المعلمين</h1>
+                <p className="text-sm text-muted-foreground">راجع الطلبات بشكل أسرع، وراجع معلومات المعلم والظهور في الرئيسية من مكان واحد.</p>
+              </div>
+            </div>
+          </div>
 
-      <div className="grid gap-3 md:grid-cols-5">
-        <SummaryCard title="إجمالي الطلبات" value={stats.total} tone="default" />
-        <SummaryCard title="قيد الانتظار" value={stats.pending} tone="pending" />
-        <SummaryCard title="مقبولة" value={stats.accepted} tone="success" />
-        <SummaryCard title="تحتاج تعديلات" value={stats.needs_changes} tone="warning" />
-        <SummaryCard title="مرفوضة" value={stats.rejected} tone="danger" />
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 md:flex-row md:items-center md:justify-between">
-        <div className="relative w-full md:max-w-sm">
-          <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="ابحث بالاسم أو البريد أو التخصص..."
-            className="pr-9"
-          />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {statusStats.map((stat) => (
+              <div key={stat.label} className={`rounded-2xl border border-border px-3 py-3 ${stat.tone}`}>
+                <p className="text-xs font-medium opacity-80">{stat.label}</p>
+                <p className="text-xl font-bold">{stat.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {STATUS_FILTERS.map((status) => (
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {STATUS_FILTERS.map((status) => {
+          const count = status === "all" ? rows.length : rows.filter((row) => row.status === status).length;
+          return (
             <button
               key={status}
               type="button"
@@ -258,131 +274,187 @@ function AdminTeacherRequestsPage() {
                   : "bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
-              {status === "all" ? "الكل" : statusLabel[status] || status}
+              {status === "all" ? `الكل (${count})` : `${statusLabel[status] || status} (${count})`}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      <div className="grid xl:grid-cols-[1.2fr_1fr] gap-6">
+      <div className="grid xl:grid-cols-[1.05fr_0.95fr] gap-6">
         <section className="rounded-2xl border border-border bg-card p-3">
+          <div className="mb-3 flex items-center justify-between px-2">
+            <div>
+              <p className="font-semibold text-foreground">قائمة الطلبات</p>
+              <p className="text-xs text-muted-foreground">اختر طلبًا لعرض التفاصيل وإجراء القرار المناسب.</p>
+            </div>
+            <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+              {filteredRows.length} طلب
+            </span>
+          </div>
+
           {loading ? (
             <div className="p-8 text-center text-muted-foreground">جاري تحميل الطلبات...</div>
           ) : filteredRows.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">لا توجد طلبات تطابق البحث أو الفلتر الحالي.</div>
+            <div className="p-8 text-center text-muted-foreground">لا توجد طلبات في هذا التصنيف.</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الاسم</TableHead>
-                  <TableHead>التخصص</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ الطلب</TableHead>
-                  <TableHead className="text-center">إجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRows.map((row) => (
-                  <TableRow key={row.id} className={selectedId === row.id ? "bg-primary/5" : ""}>
-                    <TableCell>
-                      <button type="button" onClick={() => setSelectedId(row.id)} className="text-start">
-                        <p className="font-semibold text-foreground">{row.full_name}</p>
-                        <p className="text-xs text-muted-foreground" dir="ltr">{row.email}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{row.bio_short || "بدون نبذة مختصرة"}</p>
+            <div className="space-y-2">
+              {filteredRows.map((row) => {
+                const initials = `${row.full_name?.[0] || "م"}${row.full_name?.split(" ")[1]?.[0] || ""}`;
+                return (
+                  <div key={row.id} className={`rounded-xl border p-3 transition ${selectedId === row.id ? "border-primary/40 bg-primary/5" : "border-border bg-background/60"}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <button type="button" onClick={() => setSelectedId(row.id)} className="flex-1 text-right">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                            {initials}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{row.full_name}</p>
+                            <p className="text-xs text-muted-foreground" dir="ltr">{row.email}</p>
+                          </div>
+                        </div>
                       </button>
-                    </TableCell>
-                    <TableCell>{row.specialization}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={row.status} />
-                    </TableCell>
-                    <TableCell>{new Date(row.created_at).toLocaleDateString("ar-EG")}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedId(row.id)} title="عرض">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("approve", row.id); }} title="قبول" disabled={saving}>
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("request_changes", row.id); }} title="طلب تعديلات" disabled={saving}>
-                          <MessageSquareWarning className="h-4 w-4 text-info" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("reject", row.id); }} title="رفض" disabled={saving}>
-                          <XCircle className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusStyles[row.status] || "border-border bg-muted text-muted-foreground"}`}>
+                        {statusLabel[row.status] || row.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <span className="rounded-full bg-muted/70 px-2 py-1">{row.specialization || "غير محدد"}</span>
+                      <span className="rounded-full bg-muted/70 px-2 py-1">{row.city || "غير محدد"}</span>
+                      <span className="rounded-full bg-muted/70 px-2 py-1">{new Date(row.created_at).toLocaleDateString("ar-EG")}</span>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-1">
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedId(row.id)} title="عرض">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("approve", row.id); }} title="قبول" disabled={saving}>
+                        <CheckCircle2 className="h-4 w-4 text-success" />
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("request_changes", row.id); }} title="طلب تعديلات" disabled={saving}>
+                        <MessageSquareWarning className="h-4 w-4 text-info" />
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedId(row.id); void runAction("reject", row.id); }} title="رفض" disabled={saving}>
+                        <XCircle className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-5">
           {!selected ? (
-            <p className="text-muted-foreground text-sm">اختر طلباً لعرض التفاصيل.</p>
+            <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background/40 p-6 text-center text-sm text-muted-foreground">
+              <UserRound className="mb-3 h-8 w-8 text-primary" />
+              <p className="font-semibold text-foreground">اختر طلبًا لعرض التفاصيل</p>
+              <p className="mt-1">ستظهر هنا معلومات الطلب والملاحظات والإعدادات المرتبطة بالمعلم.</p>
+            </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div className="rounded-xl border border-border bg-muted/20 p-4">
+              <div className="rounded-2xl border border-border bg-background/70 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">{selected.full_name}</h2>
-                    <p className="text-sm text-muted-foreground">{selected.specialization} • {selected.teaching_subject}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+                        {selected.full_name?.[0] || "م"}
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground">{selected.full_name}</h2>
+                        <p className="text-sm text-muted-foreground">{selected.specialization || "غير محدد"} • {selected.teaching_subject || "غير محدد"}</p>
+                      </div>
+                    </div>
                   </div>
-                  <StatusBadge status={selected.status} />
+                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusStyles[selected.status] || "border-border bg-muted text-muted-foreground"}`}>
+                    {statusLabel[selected.status] || selected.status}
+                  </span>
                 </div>
-
-                {selected.bio_full ? (
-                  <p className="mt-3 text-sm leading-6 text-foreground/90">{selected.bio_full}</p>
-                ) : (
-                  <p className="mt-3 text-sm text-muted-foreground">لا توجد نبذة تفصيلية لهذا الطلب بعد.</p>
-                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <Info label="البريد" value={selected.email} ltr />
                 <Info label="الهاتف" value={selected.phone} ltr />
-                <Info label="المدينة" value={`${selected.city}، ${selected.country}`} />
+                <Info label="المدينة" value={`${selected.city || "غير محدد"}، ${selected.country || "غير محدد"}`} />
                 <Info label="الخبرة" value={`${selected.years_experience} سنوات`} />
                 <Info label="حالة الطلب" value={statusLabel[selected.status] || selected.status} />
                 <Info label="وافق على الشروط" value={selected.terms_accepted ? "نعم" : "لا"} />
               </div>
 
-              <div className="rounded-xl border border-border p-4 space-y-2">
-                <p className="text-sm font-semibold">المستندات والملفات</p>
+              <div className="rounded-2xl border border-border bg-background/60 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold text-foreground">المستندات والملفات</h3>
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                   {selected.resume_url ? (
-                    <a href={selected.resume_url} target="_blank" rel="noreferrer" className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20">
+                    <a href={selected.resume_url} target="_blank" rel="noreferrer" className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary hover:bg-primary/15">
                       عرض السيرة الذاتية
                     </a>
                   ) : (
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">لا توجد سيرة ذاتية</span>
+                    <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">لا توجد سيرة ذاتية</span>
                   )}
+
                   {selected.certificates_urls?.length > 0 ? (
                     selected.certificates_urls.map((url) => (
-                      <a key={url} href={url} target="_blank" rel="noreferrer" className="rounded-full bg-muted px-3 py-1 text-xs hover:bg-muted/80">
-                        شهادة
+                      <a key={url} href={url} target="_blank" rel="noreferrer" className="rounded-full bg-muted px-3 py-1 text-sm hover:bg-muted/80">
+                        شهادة مرفقة
                       </a>
                     ))
                   ) : (
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">لا توجد شهادات</span>
+                    <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">لا توجد شهادات</span>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>ملاحظات الإدارة</Label>
-                <Textarea value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} rows={3} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 rounded-2xl border border-border bg-background/60 p-4">
+                  <Label>ملاحظات الإدارة</Label>
+                  <Textarea value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} rows={3} />
+                </div>
+
+                <div className="space-y-2 rounded-2xl border border-border bg-background/60 p-4">
+                  <Label>سبب القرار</Label>
+                  <Input value={decisionReason} onChange={(e) => setDecisionReason(e.target.value)} />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>سبب القرار</Label>
-                <Input value={decisionReason} onChange={(e) => setDecisionReason(e.target.value)} />
-              </div>
+              <div className="rounded-2xl border border-border p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Clock3 className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold text-sm">بيانات المعلم والظهور في الرئيسية</h3>
+                </div>
 
-              <div className="rounded-xl border border-border p-4 space-y-3">
-                <h3 className="font-bold text-sm">إعدادات الظهور في الرئيسية</h3>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="اسم المعلم">
+                    <Input value={editable.full_name} onChange={(e) => setEditable((p) => ({ ...p, full_name: e.target.value }))} />
+                  </Field>
+                  <Field label="التخصص">
+                    <Input value={editable.specialization} onChange={(e) => setEditable((p) => ({ ...p, specialization: e.target.value }))} />
+                  </Field>
+                  <Field label="المادة/الموضوع">
+                    <Input value={editable.teaching_subject} onChange={(e) => setEditable((p) => ({ ...p, teaching_subject: e.target.value }))} />
+                  </Field>
+                  <NumberField label="سنوات الخبرة" value={editable.years_experience} onChange={(v) => setEditable((p) => ({ ...p, years_experience: v }))} />
+                  <Field label="المدينة">
+                    <Input value={editable.city} onChange={(e) => setEditable((p) => ({ ...p, city: e.target.value }))} />
+                  </Field>
+                  <Field label="الدولة">
+                    <Input value={editable.country} onChange={(e) => setEditable((p) => ({ ...p, country: e.target.value }))} />
+                  </Field>
+                </div>
+
+                <Field label="رابط الصورة الشخصية">
+                  <Input value={editable.profile_image_url} onChange={(e) => setEditable((p) => ({ ...p, profile_image_url: e.target.value }))} dir="ltr" placeholder="https://..." />
+                </Field>
+
+                <Field label="نبذة كاملة عن المعلم">
+                  <Textarea value={editable.bio_full} onChange={(e) => setEditable((p) => ({ ...p, bio_full: e.target.value }))} rows={3} />
+                </Field>
+
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="is_home_visible"
@@ -392,7 +464,7 @@ function AdminTeacherRequestsPage() {
                   <Label htmlFor="is_home_visible">إظهار المعلم في قسم نخبة المعلمين</Label>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 md:grid-cols-2">
                   <NumberField label="ترتيب الظهور" value={editable.display_order} onChange={(v) => setEditable((p) => ({ ...p, display_order: v }))} />
                   <Field label="شارة">
                     <select
@@ -443,44 +515,11 @@ function AdminTeacherRequestsPage() {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const toneMap: Record<string, string> = {
-    pending: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
-    under_review: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
-    accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-    needs_changes: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
-    rejected: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
-  };
-
-  return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${toneMap[status] || "bg-muted text-muted-foreground"}`}>
-      {statusLabel[status] || status}
-    </span>
-  );
-}
-
-function SummaryCard({ title, value, tone }: { title: string; value: number; tone: "default" | "pending" | "success" | "warning" | "danger" }) {
-  const toneClasses: Record<typeof tone, string> = {
-    default: "border-border bg-background",
-    pending: "border-amber-500/30 bg-amber-500/10",
-    success: "border-emerald-500/30 bg-emerald-500/10",
-    warning: "border-violet-500/30 bg-violet-500/10",
-    danger: "border-rose-500/30 bg-rose-500/10",
-  };
-
-  return (
-    <div className={`rounded-2xl border p-4 ${toneClasses[tone]}`}>
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
-    </div>
-  );
-}
-
 function Info({ label, value, ltr = false }: { label: string; value: string; ltr?: boolean }) {
   return (
-    <div className="rounded-lg bg-muted/40 border border-border px-3 py-2">
-      <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className="font-medium text-foreground text-sm" dir={ltr ? "ltr" : "rtl"}>{value}</p>
+    <div className="rounded-xl border border-border bg-background/60 px-3 py-2.5">
+      <p className="mb-1 text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium text-foreground" dir={ltr ? "ltr" : "rtl"}>{value}</p>
     </div>
   );
 }

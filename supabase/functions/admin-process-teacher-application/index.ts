@@ -18,25 +18,65 @@ type TeacherApplication = {
   id: string;
   email: string;
   full_name: string;
-  phone: string | null;
-  country: string | null;
-  education_level: string | null;
+  phone: string;
+  country: string;
+  education_level: string;
   status: string;
 };
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
-async function findUserIdByEmail(email: string) {
-  try {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    if (error) return null;
+async function sendTeacherAcceptanceEmail(email: string, fullName: string) {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || Deno.env.get("EMAIL_FROM") || "onboarding@ma3loom.com";
+  const siteUrl = Deno.env.get("SITE_URL") || "https://ma3loom-ma3loom.vercel.app";
 
-    const found = (data?.users || []).find((u) => (u.email || "").toLowerCase() === email.toLowerCase());
-    return found?.id || null;
-  } catch {
-    return null;
+  if (!resendApiKey) {
+    console.warn("RESEND_API_KEY is not configured; skipping acceptance email.");
+    return;
   }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [email],
+      subject: "تم قبول طلبك كمعلم على منصة معلوم",
+      html: `
+        <div dir="rtl" style="font-family: Tahoma, Arial, sans-serif; color: #111827; line-height: 1.8;">
+          <h2 style="color: #0f766e;">تم قبول طلبك بنجاح</h2>
+          <p>مرحباً ${fullName || "المدرس"}،</p>
+          <p>تمت مراجعة طلبك كمعلم على منصة معلوم والموافقة عليه بنجاح.</p>
+          <p>يمكنك الآن تسجيل الدخول إلى حسابك وإكمال إعداد ملفك التعليمي والبدء في نشر المحتوى.</p>
+          <p>
+            <a href="${siteUrl}" style="display: inline-block; background: #0f766e; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none;">
+              زيارة المنصة
+            </a>
+          </p>
+          <p>نتمنى لك تجربة مميزة مع منصة معلوم.</p>
+        </div>
+      `,
+      text: `مرحباً ${fullName || "المدرس"}،\nتمت مراجعة طلبك كمعلم على منصة معلوم والموافقة عليه بنجاح. يمكنك الآن تسجيل الدخول إلى حسابك وإكمال إعداد ملفك التعليمي.\n${siteUrl}`,
+    }),
+  });
+
+  if (!response.ok) {
+    const bodyText = await response.text();
+    throw new Error(`Failed to send acceptance email: ${response.status} ${bodyText}`);
+  }
+}
+
+async function findUserIdByEmail(email: string) {
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (error) throw error;
+
+  const found = (data?.users || []).find((u) => (u.email || "").toLowerCase() === email.toLowerCase());
+  return found?.id || null;
 }
 
 serve(async (req) => {
@@ -99,40 +139,37 @@ serve(async (req) => {
           },
         );
 
-        if (!inviteError) {
-          userId = invited?.user?.id || null;
+        if (inviteError) {
+          return new Response(JSON.stringify({ error: inviteError.message }), { status: 400, ...responseHeaders });
         }
+
+        userId = invited?.user?.id || null;
       }
 
       if (!userId) {
-        userId = userRes.user.id;
+        return new Response(JSON.stringify({ error: "Failed to create or fetch instructor account" }), {
+          status: 500,
+          ...responseHeaders,
+        });
       }
 
-      try {
-        await supabaseAdmin.from("profiles").upsert({
-          user_id: userId,
-          full_name: application.full_name,
-          phone: application.phone || null,
-          country: application.country || null,
-          user_type: "instructor",
-        }, { onConflict: "user_id" });
-      } catch {
-        // ignore profile upsert errors and continue with approval flow
-      }
+      await supabaseAdmin.from("profiles").upsert({
+        user_id: userId,
+        full_name: application.full_name,
+        phone: application.phone,
+        country: application.country,
+        user_type: "instructor",
+      }, { onConflict: "user_id" });
 
-      try {
-        const { data: roleExists } = await supabaseAdmin
-          .from("user_roles")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("role", "instructor")
-          .maybeSingle();
+      const { data: roleExists } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("role", "instructor")
+        .maybeSingle();
 
-        if (!roleExists) {
-          await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "instructor" });
-        }
-      } catch {
-        // ignore role assignment errors and continue
+      if (!roleExists) {
+        await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "instructor" });
       }
 
       const { error: updateErr } = await supabaseAdmin
@@ -152,15 +189,17 @@ serve(async (req) => {
       }
 
       try {
-        await supabaseAdmin.from("user_notifications").insert({
-          user_id: userId,
-          title: "تم قبول طلبك كمعلم",
-          message: "تمت مراجعة طلبك بنجاح. يمكنك الآن تسجيل الدخول والبدء في إعداد ملفك التعليمي.",
-          link: "/profile",
-        });
-      } catch {
-        // ignore notification errors
+        await sendTeacherAcceptanceEmail(application.email, application.full_name);
+      } catch (emailError) {
+        console.error("Teacher acceptance email could not be sent:", emailError);
       }
+
+      await supabaseAdmin.from("user_notifications").insert({
+        user_id: userId,
+        title: "تم قبول طلبك كمعلم",
+        message: "تمت مراجعة طلبك بنجاح. يمكنك الآن تسجيل الدخول والبدء في إعداد ملفك التعليمي.",
+        link: "/profile",
+      });
 
       return new Response(JSON.stringify({ success: true, status: "accepted", userId }), responseHeaders);
     }

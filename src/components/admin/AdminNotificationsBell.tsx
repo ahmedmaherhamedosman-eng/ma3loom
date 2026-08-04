@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { BellRing, CheckCheck, Filter, Sparkles, Trash2 } from "lucide-react";
 
 // Light "ding" using WebAudio — no asset needed
 function playDing() {
@@ -65,18 +64,10 @@ function iconFor(type: string): string {
   return "🔔";
 }
 
-function labelForType(type: string): string {
-  if (type === "new_student") return "طالب جديد";
-  if (type === "low_rating") return "تقييم منخفض";
-  return "عام";
-}
-
 export function AdminNotificationsBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,23 +75,18 @@ export function AdminNotificationsBell() {
   }, []);
 
   const load = async () => {
-    setLoading(true);
-    try {
-      const { data } = await supabase
-        .from("admin_notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(30);
-      setNotifications((data as Notification[]) || []);
-    } finally {
-      setLoading(false);
-    }
+    const { data } = await supabase
+      .from("admin_notifications")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(30);
+    setNotifications((data as Notification[]) || []);
   };
 
   const initialLoadedRef = useRef(false);
 
   useEffect(() => {
-    load(true).then(() => {
+    load().then(() => {
       initialLoadedRef.current = true;
     });
 
@@ -125,18 +111,18 @@ export function AdminNotificationsBell() {
                 : undefined,
             });
           }
-          void load(false);
+          load();
         },
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "admin_notifications" },
-        () => void load(false),
+        () => load(),
       )
       .on(
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "admin_notifications" },
-        () => void load(false),
+        () => load(),
       )
       .subscribe();
     return () => {
@@ -146,34 +132,27 @@ export function AdminNotificationsBell() {
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const visibleNotifications = useMemo(() => {
-    if (!showOnlyUnread) return notifications;
-    return notifications.filter((n) => !n.is_read);
-  }, [notifications, showOnlyUnread]);
 
   const markAllRead = async () => {
     const ids = notifications.filter((n) => !n.is_read).map((n) => n.id);
     if (ids.length === 0) return;
-    setNotifications((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, is_read: true } : n)));
     await supabase.from("admin_notifications").update({ is_read: true }).in("id", ids);
-    await load(false);
+    load();
   };
 
   const handleClick = async (n: Notification) => {
     if (!n.is_read) {
-      setNotifications((prev) => prev.map((item) => (item.id === n.id ? { ...item, is_read: true } : item)));
       await supabase.from("admin_notifications").update({ is_read: true }).eq("id", n.id);
     }
     setOpen(false);
     if (n.link) navigate({ to: n.link });
-    await load(false);
+    load();
   };
 
-  const handleDelete = async (e: MouseEvent, id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    setNotifications((prev) => prev.filter((item) => item.id !== id));
     await supabase.from("admin_notifications").delete().eq("id", id);
-    await load(false);
+    load();
   };
 
   if (!mounted) {
@@ -199,77 +178,45 @@ export function AdminNotificationsBell() {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[92vw] max-w-sm p-0 border border-sky-100 shadow-2xl bg-white ring-1 ring-sky-50 rounded-2xl" side="bottom">
-        <div className="border-b border-sky-100 bg-white px-4 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-sky-700">الإشعارات</h3>
-              <p className="text-xs text-sky-600">تابع أهم التحديثات والإجراءات الواردة</p>
-            </div>
-            {unreadCount > 0 && (
-              <Button variant="ghost" size="sm" className="h-auto py-1 text-xs" onClick={markAllRead}>
-                <CheckCheck className="ml-1 h-3.5 w-3.5" />
-                قراءة الكل
-              </Button>
-            )}
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <Button
-              type="button"
-              variant={showOnlyUnread ? "secondary" : "ghost"}
-              size="sm"
-              className="h-8 px-2 text-xs"
-              onClick={() => setShowOnlyUnread((prev) => !prev)}
-            >
-              <Filter className="ml-1 h-3.5 w-3.5" />
-              غير المقروءة فقط
+      <PopoverContent align="end" className="w-80 p-0 bg-sky-100 text-black border border-border shadow-lg rounded-xl overflow-hidden" side="bottom">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-sky-100">
+          <h3 className="font-bold text-sm text-black">الإشعارات</h3>
+          {unreadCount > 0 && (
+            <Button variant="ghost" size="sm" className="text-xs h-auto py-1" onClick={markAllRead}>
+              تحديد الكل كمقروء
             </Button>
-            <span className="text-xs text-muted-foreground">{unreadCount} غير مقروءة</span>
-          </div>
+          )}
         </div>
-        <ScrollArea className="h-[24rem] bg-white">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center gap-2 p-8 text-center text-sm text-muted-foreground">
-              <Sparkles className="h-5 w-5 text-primary" />
-              جاري تحميل الإشعارات...
-            </div>
-          ) : visibleNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 p-8 text-center text-sm text-muted-foreground">
-              <BellRing className="h-5 w-5" />
-              {showOnlyUnread ? "لا توجد إشعارات غير مقروءة" : "لا توجد إشعارات حتى الآن"}
+        <ScrollArea className="h-96 bg-sky-100">
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center text-sm text-black bg-sky-100">
+              لا توجد إشعارات
             </div>
           ) : (
-            <div className="divide-y divide-border p-2">
-              {visibleNotifications.map((n) => (
+            <div className="divide-y divide-border">
+              {notifications.map((n) => (
                 <div
                   key={n.id}
-                  onClick={() => void handleClick(n)}
-                  className={`group rounded-xl border p-3 transition-colors ${
-                    !n.is_read ? "border-primary/20 bg-primary/5" : "border-transparent bg-background hover:bg-muted/50"
-                  }`}
+                  onClick={() => handleClick(n)}
+                  className="group p-3 cursor-pointer text-black transition-colors flex gap-3 bg-sky-100 hover:bg-sky-200"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
-                      {iconFor(n.type)}
+                  <div className="text-xl shrink-0">{iconFor(n.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium text-black line-clamp-1">{n.title}</p>
+                      {!n.is_read && (
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />
+                      )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground line-clamp-1">{n.title}</p>
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">{labelForType(n.type)}</p>
-                        </div>
-                        {!n.is_read && <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />}
-                      </div>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground line-clamp-2">{n.message}</p>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-[10px] text-muted-foreground">{formatTime(n.created_at)}</span>
-                        <button
-                          onClick={(e) => void handleDelete(e, n.id)}
-                          className="flex items-center gap-1 rounded-full px-2 py-1 text-[10px] text-destructive opacity-70 transition-opacity hover:bg-destructive/10 hover:opacity-100"
-                        >
-                          <Trash2 className="h-3 w-3" /> حذف
-                        </button>
-                      </div>
+                    <p className="text-xs text-black/80 line-clamp-2 mt-0.5">{n.message}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] text-black/70">{formatTime(n.created_at)}</span>
+                      <button
+                        onClick={(e) => handleDelete(e, n.id)}
+                        className="text-[10px] text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        حذف
+                      </button>
                     </div>
                   </div>
                 </div>

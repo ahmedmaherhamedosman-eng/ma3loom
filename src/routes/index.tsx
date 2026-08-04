@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/CourseCard";
+import { EliteTeachersSection } from "@/components/EliteTeachersSection";
 import PrivateLessonsSection from "@/components/PrivateLessonsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { type TeacherProfileRow } from "@/lib/teachers";
@@ -100,7 +101,7 @@ function HomePage() {
           .from("teacher_applications")
           .select("id,full_name,specialization,teaching_subject,years_experience,bio_short,profile_image_url,badge,students_count,courses_count,rating_avg,rating_count,is_home_visible,display_order,status,city,country,availability,teaching_type,linkedin_url,youtube_url,intro_video_url,bio_full")
           .eq("status", "accepted")
-          .or("is_home_visible.eq.true,is_home_visible.is.null")
+          .eq("is_home_visible", true)
           .order("display_order", { ascending: true })
           .limit(6),
       ]);
@@ -109,8 +110,7 @@ function HomePage() {
       setPosts(postsRes.data || []);
       setLiveSessions(liveRes.data || []);
       setSpecialties(specRes.data || []);
-      const teacherRows = (teachersRes.data as TeacherProfileRow[] | null) || [];
-      setTeachers(teacherRows.filter((teacher) => teacher.full_name?.trim() || teacher.specialization?.trim()));
+      setTeachers((teachersRes.data as TeacherProfileRow[] | null) || []);
 
       const totalLessons = (coursesRes.data || []).reduce((s, c) => s + (c.lessons_count || 0), 0);
       setStats({
@@ -296,55 +296,6 @@ function HomePage() {
 
       <PrivateLessonsSection />
 
-      <section className="relative py-20 lg:py-28 overflow-hidden">
-        <div className="absolute -top-24 -start-24 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -end-24 w-80 h-80 rounded-full bg-warm/10 blur-3xl pointer-events-none" />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 lg:mb-12">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 mb-4">
-              <span className="text-sm font-bold">⭐ فريق معلمي منصة معلوم</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
-              فريق معلمي منصة معلوم
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-3xl mx-auto leading-8">
-              نفخر في منصة معلوم بوجود نخبة من المعلمين المتخصصين الذين يمتلكون الخبرة والكفاءة في تقديم تعليم متميز ومساعدة الطلاب على تحقيق أفضل النتائج.
-            </p>
-          </div>
-
-          {teachers.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {teachers.map((teacher) => (
-                <article
-                  key={teacher.id}
-                  className="group rounded-[1.75rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_rgba(15,23,42,0.12)]"
-                >
-                  <div className="flex flex-col items-center text-center">
-                    <img
-                      src={teacher.profile_image_url || "/placeholder.svg"}
-                      alt={teacher.full_name}
-                      className="h-28 w-28 rounded-full object-cover border-4 border-primary/15 shadow-md"
-                      loading="lazy"
-                    />
-                    <h3 className="mt-4 text-xl font-extrabold text-foreground">{teacher.full_name}</h3>
-                    <p className="mt-1 text-sm font-semibold text-primary">{teacher.specialization} • {teacher.teaching_subject}</p>
-                    <p className="mt-4 text-sm leading-8 text-muted-foreground">
-                      {teacher.bio_short || "معلم متميز يقدم تجربة تعليمية ممتعة ومخصصة بناءً على احتياجات الطلاب وأهدافهم."}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-[1.75rem] border border-dashed border-border bg-card/70 p-10 text-center shadow-sm">
-              <p className="text-lg font-semibold text-foreground">سيظهر هنا فريق المعلمين قريبًا</p>
-              <p className="mt-2 text-sm text-muted-foreground">يمكنك إضافة معلمين معتمدين وسيظهرون فورًا في هذه المنطقة.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* Featured Courses */}
       <section className="py-20 lg:py-28 bg-gradient-to-b from-muted/40 via-muted/30 to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -441,6 +392,8 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      <EliteTeachersSection teachers={teachers} />
 
       {/* CTA */}
       <section className="py-20 lg:py-28 bg-gradient-to-b from-background to-muted/30">

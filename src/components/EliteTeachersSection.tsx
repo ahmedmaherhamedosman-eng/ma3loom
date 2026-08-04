@@ -13,8 +13,86 @@ const reveal = {
   visible: { opacity: 1, y: 0 },
 };
 
+const fallbackTeachers: TeacherProfileRow[] = [
+  {
+    id: "sample-1",
+    full_name: "أ. سارة الحربي",
+    specialization: "الرياضيات",
+    teaching_subject: "المرحلة الثانوية",
+    years_experience: 10,
+    bio_short: "معلمة رياضيات ذات خبرة في تبسيط المفاهيم المعقدة وتقديم شرح ممتع للطلاب.",
+    profile_image_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+    badge: "معلم متميز",
+    students_count: 2400,
+    courses_count: 18,
+    rating_avg: 4.9,
+    rating_count: 320,
+    is_home_visible: true,
+    display_order: 1,
+    status: "accepted",
+    city: "الرياض",
+    country: "السعودية",
+    availability: "متاحة",
+    teaching_type: "both",
+    linkedin_url: null,
+    youtube_url: null,
+    intro_video_url: null,
+    bio_full: null,
+  },
+  {
+    id: "sample-2",
+    full_name: "د. محمد السعيد",
+    specialization: "البرمجة",
+    teaching_subject: "Python & Web Development",
+    years_experience: 8,
+    bio_short: "خبير برمجة يعلّم الطلاب من الصفر ويهتم بتنمية التفكير المنطقي وحل المشكلات.",
+    profile_image_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80",
+    badge: "الأكثر طلباً",
+    students_count: 1800,
+    courses_count: 14,
+    rating_avg: 4.8,
+    rating_count: 280,
+    is_home_visible: true,
+    display_order: 2,
+    status: "accepted",
+    city: "دبي",
+    country: "الإمارات",
+    availability: "متاحة",
+    teaching_type: "both",
+    linkedin_url: null,
+    youtube_url: null,
+    intro_video_url: null,
+    bio_full: null,
+  },
+  {
+    id: "sample-3",
+    full_name: "أ. فاطمة الجهني",
+    specialization: "اللغة العربية",
+    teaching_subject: "الإملاء والبلاغة",
+    years_experience: 12,
+    bio_short: "معلّمة عربية تهدف إلى تنمية التعبير والكتابة بأسلوب ممتع ومبسط يناسب جميع الأعمار.",
+    profile_image_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+    badge: "خبير معتمد",
+    students_count: 2100,
+    courses_count: 16,
+    rating_avg: 4.95,
+    rating_count: 310,
+    is_home_visible: true,
+    display_order: 3,
+    status: "accepted",
+    city: "جدة",
+    country: "السعودية",
+    availability: "متاحة",
+    teaching_type: "both",
+    linkedin_url: null,
+    youtube_url: null,
+    intro_video_url: null,
+    bio_full: null,
+  },
+];
+
 export function EliteTeachersSection({ teachers }: EliteTeachersSectionProps) {
-  if (teachers.length === 0) return null;
+  const displayTeachers = teachers.length > 0 ? teachers : fallbackTeachers;
 
   return (
     <section className="relative py-20 lg:py-28 overflow-hidden">
@@ -32,10 +110,10 @@ export function EliteTeachersSection({ teachers }: EliteTeachersSectionProps) {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 mb-4">
             <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-bold">نخبة معلمي منصة معلوم</span>
+            <span className="text-sm font-bold">النخبة</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4">
-            معلمون يصنعون فارقاً حقيقياً
+            معلمون من نخبة منصة معلوم
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             خبراء في التعليم الرقمي يقدمون تجربة تعلم مخصصة، نتائج ملموسة، ومتابعة دقيقة لكل طالب.
@@ -49,7 +127,7 @@ export function EliteTeachersSection({ teachers }: EliteTeachersSectionProps) {
           transition={{ staggerChildren: 0.08 }}
           className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6"
         >
-          {teachers.map((teacher) => (
+          {displayTeachers.map((teacher) => (
             <motion.article
               key={teacher.id}
               variants={reveal}
@@ -98,13 +176,12 @@ export function EliteTeachersSection({ teachers }: EliteTeachersSectionProps) {
                 </div>
               </div>
 
-              <Link
-                to="/teachers/$teacherId"
-                params={{ teacherId: teacher.id }}
+              <a
+                href={teacher.id.startsWith("sample-") ? "/teach-with-us" : `/teachers/${teacher.id}`}
                 className="mt-5 inline-flex w-full items-center justify-center rounded-xl gradient-brand px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-elevated"
               >
                 عرض الملف الكامل
-              </Link>
+              </a>
             </motion.article>
           ))}
         </motion.div>

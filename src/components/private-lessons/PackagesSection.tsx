@@ -114,7 +114,29 @@ export default function PackagesSection(){
         )}
 
         {!loading && !error && packages && packages.length > 0 && (
-          <PackagesGrid packages={packages} />
+          <>
+            <PackagesGrid packages={packages} />
+
+            <div className="mt-10 rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-6 shadow-sm dark:border-emerald-800 dark:from-emerald-950/40 dark:to-green-950/40">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-foreground">حجز حصة من خلال التواصل على الواتساب</h3>
+                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                    إذا كنت تفضل حجز حصة مباشرة أو تريد الاستفسار عن الباقات يناسبك، تواصل معنا على الواتساب وسنساعدك في اختيار الموعد المناسب.
+                  </p>
+                </div>
+
+                <a
+                  href="https://wa.me/201060990370?text=أريد%20حجز%20حصة%20خصوصية%20في%20منصة%20معلوم"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  تواصل عبر واتساب
+                </a>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </section>
