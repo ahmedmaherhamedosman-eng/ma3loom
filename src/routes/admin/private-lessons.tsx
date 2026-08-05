@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import type { Database } from '@/integrations/supabase/types'
+import { ImageUpload } from '@/components/ImageUpload'
 import { 
   Package, CalendarCheck, Users, DollarSign, Plus, Edit, Trash2, Loader2, X 
 } from 'lucide-react'
@@ -35,6 +36,7 @@ function AdminPrivateLessonsDashboard() {
     duration_minutes: '60',
     sessions_count: '1',
     featuresText: '',
+    image_url: '',
     is_featured: false,
     is_active: true
   })
@@ -77,6 +79,7 @@ function AdminPrivateLessonsDashboard() {
       duration_minutes: '60',
       sessions_count: '1',
       featuresText: '',
+      image_url: '',
       is_featured: false,
       is_active: true
     })
@@ -95,6 +98,7 @@ function AdminPrivateLessonsDashboard() {
       duration_minutes: String(pkg.duration_minutes || 60),
       sessions_count: String(pkg.sessions_count || 1),
       featuresText: Array.isArray(pkg.feature_list) ? pkg.feature_list.join('\n') : '',
+      image_url: pkg.image_url || '',
       is_featured: pkg.is_featured || false,
       is_active: pkg.is_active ?? true
     })
@@ -120,6 +124,7 @@ function AdminPrivateLessonsDashboard() {
       duration_minutes: parseInt(formData.duration_minutes, 10) || 60,
       sessions_count: parseInt(formData.sessions_count, 10) || 1,
       feature_list: featuresArray,
+      image_url: formData.image_url || null,
       is_featured: formData.is_featured,
       is_active: formData.is_active
     }
@@ -464,6 +469,15 @@ function AdminPrivateLessonsDashboard() {
                   onChange={e => setFormData({...formData, short_description: e.target.value})}
                   placeholder="وصف مختصر للباقة..."
                   className="w-full px-3 py-2 text-xs border rounded-xl dark:bg-slate-800 dark:border-slate-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1">صورة الباقة</label>
+                <ImageUpload
+                  value={formData.image_url}
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                  folder="private-lessons"
                 />
               </div>
 

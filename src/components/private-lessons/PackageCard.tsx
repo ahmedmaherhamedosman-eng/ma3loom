@@ -16,6 +16,7 @@ export type Package = {
   duration_minutes?: number | null
   features?: string[] | null
   color?: string | null
+  image_url?: string | null
 }
 
 export default function PackageCard({ pkg }:{pkg:Package}){
@@ -76,13 +77,18 @@ export default function PackageCard({ pkg }:{pkg:Package}){
         }}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.7),transparent_40%)]" />
-        <svg viewBox="0 0 220 120" className="absolute inset-0 h-full w-full opacity-80" aria-hidden="true">
-          <path d="M18 88C44 58 81 46 112 56C142 65 167 101 202 98" fill="none" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
-          <circle cx="84" cy="44" r="18" fill={accentColor} fillOpacity="0.2" />
-          <circle cx="165" cy="34" r="11" fill={accentColor} fillOpacity="0.18" />
-          <path d="M32 38h30" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
-          <path d="M44 24v28" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
-        </svg>
+        {pkg.image_url ? (
+          <img src={pkg.image_url} alt={pkg.name} className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <svg viewBox="0 0 220 120" className="absolute inset-0 h-full w-full opacity-80" aria-hidden="true">
+            <path d="M18 88C44 58 81 46 112 56C142 65 167 101 202 98" fill="none" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
+            <circle cx="84" cy="44" r="18" fill={accentColor} fillOpacity="0.2" />
+            <circle cx="165" cy="34" r="11" fill={accentColor} fillOpacity="0.18" />
+            <path d="M32 38h30" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
+            <path d="M44 24v28" stroke={accentColor} strokeWidth="6" strokeLinecap="round" />
+          </svg>
+        )}
+        {pkg.image_url && <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 to-transparent" />}
 
         <div className="relative flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg backdrop-blur" style={{ background: `linear-gradient(135deg, ${accentColor}, rgba(255,255,255,0.95))` }}>
