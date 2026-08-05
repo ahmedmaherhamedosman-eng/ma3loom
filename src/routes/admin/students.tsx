@@ -338,14 +338,14 @@ function AdminStudents() {
       {/* Details modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={() => setSelected(null)}>
-          <div className="bg-card rounded-2xl border border-border max-w-2xl w-full p-6 shadow-xl my-8" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[#f7efe3] text-black rounded-2xl border border-[#e7d8c3] max-w-2xl w-full p-6 shadow-xl my-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-primary-foreground text-xl font-bold">
                   {selected.full_name?.[0] || "؟"}
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-foreground">{selected.full_name}</h2>
+                  <h2 className="text-lg font-bold text-black">{selected.full_name}</h2>
                   <span className={`text-xs px-2 py-1 rounded-full ${userTypeColor[selected.user_type] || "bg-muted"}`}>
                     {userTypeLabel[selected.user_type] || selected.user_type}
                   </span>
@@ -355,20 +355,20 @@ function AdminStudents() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-              <div className="bg-muted/30 rounded-lg p-2.5 text-center">
-                <div className="text-[10px] text-muted-foreground mb-0.5">السن</div>
-                <div className="font-bold text-foreground text-sm">{selected.age || "—"}</div>
+              <div className="bg-muted rounded-lg p-2.5 text-center border border-border">
+                <div className="text-[10px] text-black/70 mb-0.5">السن</div>
+                <div className="font-bold text-black text-sm">{selected.age || "—"}</div>
               </div>
-              <div className="bg-muted/30 rounded-lg p-2.5 text-center">
-                <div className="text-[10px] text-muted-foreground mb-0.5">المرحلة</div>
-                <div className="font-bold text-foreground text-xs truncate">{selected.education_level || "—"}</div>
+              <div className="bg-muted rounded-lg p-2.5 text-center border border-border">
+                <div className="text-[10px] text-black/70 mb-0.5">المرحلة</div>
+                <div className="font-bold text-black text-xs truncate">{selected.education_level || "—"}</div>
               </div>
               <div className="bg-success/10 rounded-lg p-2.5 text-center">
-                <div className="text-[10px] text-muted-foreground mb-0.5">المدفوع</div>
+                <div className="text-[10px] text-black/70 mb-0.5">المدفوع</div>
                 <div className="font-bold text-success text-sm" dir="ltr">${selected.totalPaid.toFixed(2)}</div>
               </div>
               <div className="bg-primary/10 rounded-lg p-2.5 text-center">
-                <div className="text-[10px] text-muted-foreground mb-0.5">آخر نشاط</div>
+                <div className="text-[10px] text-black/70 mb-0.5">آخر نشاط</div>
                 <div className="font-bold text-primary text-[10px]">
                   {selected.lastActivity
                     ? new Date(selected.lastActivity).toLocaleDateString("ar-EG")
@@ -378,25 +378,25 @@ function AdminStudents() {
             </div>
 
             {selected.phone && (
-              <div className="bg-muted/30 rounded-lg p-3 mb-4">
-                <div className="text-xs text-muted-foreground mb-1">رقم الجوال</div>
-                <div className="font-medium text-foreground" dir="ltr">{selected.phone}</div>
+              <div className="bg-muted rounded-lg p-3 mb-4 border border-border">
+                <div className="text-xs text-black/70 mb-1">رقم الجوال</div>
+                <div className="font-medium text-black" dir="ltr">{selected.phone}</div>
               </div>
             )}
 
             <div>
-              <div className="text-sm font-semibold text-foreground mb-2">
+              <div className="text-sm font-semibold text-black mb-2">
                 📚 الكورسات ({selected.enrollmentCount})
               </div>
               {selected.enrolledCourses.length === 0 ? (
-                <div className="text-sm text-muted-foreground bg-muted/30 rounded-lg p-4 text-center">لا توجد كورسات مسجَّلة</div>
+                <div className="text-sm text-muted-foreground bg-muted rounded-lg p-4 text-center border border-border">لا توجد كورسات مسجَّلة</div>
               ) : (
                 <ul className="space-y-2 max-h-80 overflow-y-auto">
                   {selected.enrolledCourses.map((e) => (
-                    <li key={e.course_id} className="bg-muted/30 rounded-lg p-3">
+                    <li key={e.course_id} className="bg-muted rounded-lg p-3 border border-border">
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-foreground text-sm truncate">{e.course_title}</div>
+                          <div className="font-medium text-black text-sm truncate">{e.course_title}</div>
                           {e.last_lesson_title && (
                             <div className="text-[11px] text-muted-foreground truncate">
                               آخر درس: {e.last_lesson_title}
@@ -411,7 +411,7 @@ function AdminStudents() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Progress value={e.progress_percentage} className="h-1.5 flex-1" />
-                        <span className="text-xs font-bold text-foreground w-10 text-end">{e.progress_percentage}%</span>
+                        <span className="text-xs font-bold text-black w-10 text-end">{e.progress_percentage}%</span>
                       </div>
                     </li>
                   ))}

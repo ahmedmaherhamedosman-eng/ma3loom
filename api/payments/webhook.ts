@@ -13,7 +13,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let event: Stripe.Event
   try {
     if (!sig || !webhookSecret) {
-      // Fallback: try to parse raw body
       event = req.body as Stripe.Event
     } else {
       event = stripe.webhooks.constructEvent((req as any).rawBody || req.body, sig, webhookSecret)
@@ -32,18 +31,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const bookingId = metadata['booking_id']
 
       if (paymentStatus === 'paid') {
-        // update payments row
-        if (paymentId) await supabase.from('payments').update({ status: 'succeeded' }).eq('id', paymentId)
+        if (paymentId) {
+          await supabase.from('payments').update({ status: 'succeeded' }).eq('id', paymentId)
+        }
 
-        // handle coupon usage increment if present
         const couponId = metadata['coupon_id']
         if (couponId) {
           try {
-            const { data: coupon } = await supabase.from('coupons').select().eq('id', couponId).single()
+            const { data: coupon } = await supabase.from('coupons').select('id, current_uses, max_uses, is_active').eq('id', couponId).single()
             if (coupon) {
-              const timesUsed = (coupon.times_used || 0) + 1
-              const updates: any = { times_used: timesUsed }
-              if (coupon.usage_limit && timesUsed >= coupon.usage_limit) updates.active = false
+              const nextUses = (coupon.current_uses || 0) + 1
+              const updates: Record<string, unknown> = { current_uses: nextUses }
+              if (coupon.max_uses && nextUses >= coupon.max_uses) updates.is_active = false
               await supabase.from('coupons').update(updates).eq('id', couponId)
             }
           } catch (e) {
@@ -51,13 +50,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         }
 
-        // finalize booking: set status, create session row(s), deduct counts, notifications
         if (bookingId) {
-          // mark booking as confirmed
           await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', bookingId)
 
-          // create a single session for the booking (placeholder)
-          const bookingRes = await supabase.from('bookings').select().eq('id', bookingId).single()
+          const bookingRes = await supabase.from('bookings').select('id, teacher_id, user_id, slot, duration_minutes').eq('id', bookingId).single()
           const booking = bookingRes.data
           if (booking) {
             await supabase.from('sessions').insert([{ booking_id: bookingId, teacher_id: booking.teacher_id, student_id: booking.user_id, slot: booking.slot, duration_minutes: booking.duration_minutes || 60 }])
