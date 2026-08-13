@@ -58,7 +58,6 @@ import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
 import { Route as BlogPostIdRouteImport } from './routes/blog.$postId'
 import { Route as AdminTeachersRouteImport } from './routes/admin/teachers'
-import { Route as AdminTeacherRequestsRouteImport } from './routes/admin/teacher-requests'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
 import { Route as AdminQuizzesRouteImport } from './routes/admin/quizzes'
@@ -67,7 +66,6 @@ import { Route as AdminPostsRouteImport } from './routes/admin/posts'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminLiveRouteImport } from './routes/admin/live'
 import { Route as AdminLessonRequestsRouteImport } from './routes/admin/lesson-requests'
-import { Route as AdminInstructorsRouteImport } from './routes/admin/instructors'
 import { Route as AdminHtmlQuizzesRouteImport } from './routes/admin/html-quizzes'
 import { Route as AdminGamesRouteImport } from './routes/admin/games'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
@@ -326,11 +324,6 @@ const AdminTeachersRoute = AdminTeachersRouteImport.update({
   path: '/teachers',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminTeacherRequestsRoute = AdminTeacherRequestsRouteImport.update({
-  id: '/teacher-requests',
-  path: '/teacher-requests',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -369,11 +362,6 @@ const AdminLiveRoute = AdminLiveRouteImport.update({
 const AdminLessonRequestsRoute = AdminLessonRequestsRouteImport.update({
   id: '/lesson-requests',
   path: '/lesson-requests',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminInstructorsRoute = AdminInstructorsRouteImport.update({
-  id: '/instructors',
-  path: '/instructors',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminHtmlQuizzesRoute = AdminHtmlQuizzesRouteImport.update({
@@ -461,7 +449,6 @@ export interface FileRoutesByFullPath {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/games': typeof AdminGamesRoute
   '/admin/html-quizzes': typeof AdminHtmlQuizzesRoute
-  '/admin/instructors': typeof AdminInstructorsRoute
   '/admin/lesson-requests': typeof AdminLessonRequestsRoute
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -470,7 +457,6 @@ export interface FileRoutesByFullPath {
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
-  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
@@ -532,7 +518,6 @@ export interface FileRoutesByTo {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/games': typeof AdminGamesRoute
   '/admin/html-quizzes': typeof AdminHtmlQuizzesRoute
-  '/admin/instructors': typeof AdminInstructorsRoute
   '/admin/lesson-requests': typeof AdminLessonRequestsRoute
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -541,7 +526,6 @@ export interface FileRoutesByTo {
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
-  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
@@ -604,7 +588,6 @@ export interface FileRoutesById {
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/games': typeof AdminGamesRoute
   '/admin/html-quizzes': typeof AdminHtmlQuizzesRoute
-  '/admin/instructors': typeof AdminInstructorsRoute
   '/admin/lesson-requests': typeof AdminLessonRequestsRoute
   '/admin/live': typeof AdminLiveRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -613,7 +596,6 @@ export interface FileRoutesById {
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
-  '/admin/teacher-requests': typeof AdminTeacherRequestsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
@@ -678,7 +660,6 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/games'
     | '/admin/html-quizzes'
-    | '/admin/instructors'
     | '/admin/lesson-requests'
     | '/admin/live'
     | '/admin/payments'
@@ -687,7 +668,6 @@ export interface FileRouteTypes {
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
-    | '/admin/teacher-requests'
     | '/admin/teachers'
     | '/blog/$postId'
     | '/books/$bookId'
@@ -749,7 +729,6 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/games'
     | '/admin/html-quizzes'
-    | '/admin/instructors'
     | '/admin/lesson-requests'
     | '/admin/live'
     | '/admin/payments'
@@ -758,7 +737,6 @@ export interface FileRouteTypes {
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
-    | '/admin/teacher-requests'
     | '/admin/teachers'
     | '/blog/$postId'
     | '/books/$bookId'
@@ -820,7 +798,6 @@ export interface FileRouteTypes {
     | '/admin/courses'
     | '/admin/games'
     | '/admin/html-quizzes'
-    | '/admin/instructors'
     | '/admin/lesson-requests'
     | '/admin/live'
     | '/admin/payments'
@@ -829,7 +806,6 @@ export interface FileRouteTypes {
     | '/admin/quizzes'
     | '/admin/reviews'
     | '/admin/students'
-    | '/admin/teacher-requests'
     | '/admin/teachers'
     | '/blog/$postId'
     | '/books/$bookId'
@@ -1255,13 +1231,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeachersRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/teacher-requests': {
-      id: '/admin/teacher-requests'
-      path: '/teacher-requests'
-      fullPath: '/admin/teacher-requests'
-      preLoaderRoute: typeof AdminTeacherRequestsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/students': {
       id: '/admin/students'
       path: '/students'
@@ -1316,13 +1285,6 @@ declare module '@tanstack/react-router' {
       path: '/lesson-requests'
       fullPath: '/admin/lesson-requests'
       preLoaderRoute: typeof AdminLessonRequestsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/instructors': {
-      id: '/admin/instructors'
-      path: '/instructors'
-      fullPath: '/admin/instructors'
-      preLoaderRoute: typeof AdminInstructorsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/html-quizzes': {
@@ -1412,7 +1374,6 @@ interface AdminRouteChildren {
   AdminCoursesRoute: typeof AdminCoursesRoute
   AdminGamesRoute: typeof AdminGamesRoute
   AdminHtmlQuizzesRoute: typeof AdminHtmlQuizzesRoute
-  AdminInstructorsRoute: typeof AdminInstructorsRoute
   AdminLessonRequestsRoute: typeof AdminLessonRequestsRoute
   AdminLiveRoute: typeof AdminLiveRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
@@ -1421,7 +1382,6 @@ interface AdminRouteChildren {
   AdminQuizzesRoute: typeof AdminQuizzesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
-  AdminTeacherRequestsRoute: typeof AdminTeacherRequestsRoute
   AdminTeachersRoute: typeof AdminTeachersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLessonsCourseIdRoute: typeof AdminLessonsCourseIdRoute
@@ -1434,7 +1394,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCoursesRoute: AdminCoursesRoute,
   AdminGamesRoute: AdminGamesRoute,
   AdminHtmlQuizzesRoute: AdminHtmlQuizzesRoute,
-  AdminInstructorsRoute: AdminInstructorsRoute,
   AdminLessonRequestsRoute: AdminLessonRequestsRoute,
   AdminLiveRoute: AdminLiveRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
@@ -1443,7 +1402,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminQuizzesRoute: AdminQuizzesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminStudentsRoute: AdminStudentsRoute,
-  AdminTeacherRequestsRoute: AdminTeacherRequestsRoute,
   AdminTeachersRoute: AdminTeachersRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLessonsCourseIdRoute: AdminLessonsCourseIdRoute,

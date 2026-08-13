@@ -86,71 +86,49 @@ function HomePage() {
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    let isMounted = true;
-
     (async () => {
-      try {
-        const [coursesRes, postsRes, liveRes, profilesRes, specRes, teachersRes] = await Promise.all([
-          supabase.from("courses").select("id,title,description,instructor,category,level,students_count,lessons_count,price,currency,image_url")
-            .eq("is_published", true).order("created_at", { ascending: false }).limit(4),
-          supabase.from("posts").select("id,title,excerpt,image_url,published_at")
-            .eq("status", "published").order("published_at", { ascending: false }).limit(3),
-          supabase.from("live_sessions").select("id,title,description,scheduled_at,duration_minutes,platform,meeting_link")
-            .gte("scheduled_at", new Date().toISOString()).order("scheduled_at", { ascending: true }).limit(3),
-          supabase.from("profiles").select("id", { count: "exact", head: true }),
-          supabase.from("tutoring_specialties").select("id,name,slug,description,icon,price_per_hour")
-            .eq("is_active", true).order("sort_order").limit(6),
-          supabase
-            .from("teacher_applications")
-            .select("id,full_name,specialization,teaching_subject,years_experience,bio_short,profile_image_url,badge,students_count,courses_count,rating_avg,rating_count,is_home_visible,display_order,status,city,country,availability,teaching_type,linkedin_url,youtube_url,intro_video_url,bio_full")
-            .eq("status", "accepted")
-            .eq("is_home_visible", true)
-            .order("display_order", { ascending: true })
-            .limit(6),
-        ]);
+      const [coursesRes, postsRes, liveRes, profilesRes, specRes, teachersRes] = await Promise.all([
+        supabase.from("courses").select("id,title,description,instructor,category,level,students_count,lessons_count,price,currency,image_url")
+          .eq("is_published", true).order("created_at", { ascending: false }).limit(4),
+        supabase.from("posts").select("id,title,excerpt,image_url,published_at")
+          .eq("status", "published").order("published_at", { ascending: false }).limit(3),
+        supabase.from("live_sessions").select("id,title,description,scheduled_at,duration_minutes,platform,meeting_link")
+          .gte("scheduled_at", new Date().toISOString()).order("scheduled_at", { ascending: true }).limit(3),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("tutoring_specialties").select("id,name,slug,description,icon,price_per_hour")
+          .eq("is_active", true).order("sort_order").limit(6),
+        supabase
+          .from("teacher_applications")
+          .select("id,full_name,specialization,teaching_subject,years_experience,bio_short,profile_image_url,badge,students_count,courses_count,rating_avg,rating_count,is_home_visible,display_order,status,city,country,availability,teaching_type,linkedin_url,youtube_url,intro_video_url,bio_full")
+          .eq("status", "accepted")
+          .eq("is_home_visible", true)
+          .order("display_order", { ascending: true })
+          .limit(6),
+      ]);
 
-        if (!isMounted) return;
+      setCourses(coursesRes.data || []);
+      setPosts(postsRes.data || []);
+      setLiveSessions(liveRes.data || []);
+      setSpecialties(specRes.data || []);
+      setTeachers((teachersRes.data as TeacherProfileRow[] | null) || []);
 
-        setCourses(coursesRes.data || []);
-        setPosts(postsRes.data || []);
-        setLiveSessions(liveRes.data || []);
-        setSpecialties(specRes.data || []);
-        setTeachers((teachersRes.data as TeacherProfileRow[] | null) || []);
+      const totalLessons = (coursesRes.data || []).reduce((s, c) => s + (c.lessons_count || 0), 0);
+      setStats({
+        students: profilesRes.count || 0,
+        courses: coursesRes.data?.length || 0,
+        lessons: totalLessons,
+      });
 
-        const totalLessons = (coursesRes.data || []).reduce((s, c) => s + (c.lessons_count || 0), 0);
-        setStats({
-          students: profilesRes.count || 0,
-          courses: coursesRes.data?.length || 0,
-          lessons: totalLessons,
-        });
-
-        // Fetch current user's enrollments to mark cards correctly
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-
-        if (session) {
-          const { data: enr } = await supabase
-            .from("enrollments")
-            .select("course_id")
-            .eq("user_id", session.user.id);
-          setEnrolledIds(new Set((enr || []).map((e) => e.course_id)));
-        }
-      } catch (error) {
-        console.error("Failed to load homepage data", error);
-        if (!isMounted) return;
-
-        setCourses([]);
-        setPosts([]);
-        setLiveSessions([]);
-        setSpecialties([]);
-        setTeachers([]);
-        setStats({ students: 0, courses: 0, lessons: 0 });
+      // Fetch current user's enrollments to mark cards correctly
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: enr } = await supabase
+          .from("enrollments")
+          .select("course_id")
+          .eq("user_id", session.user.id);
+        setEnrolledIds(new Set((enr || []).map((e) => e.course_id)));
       }
     })();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
