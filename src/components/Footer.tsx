@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useSocialLinks } from "@/lib/social-links";
 
 export function Footer() {
+  const socialLinks = useSocialLinks();
+
   return (
     <footer className="relative overflow-hidden bg-[linear-gradient(135deg,#0F3DDE,#1E6DFF)] text-white">
       <div className="absolute inset-0 opacity-20 bg-dots pointer-events-none" />
@@ -48,6 +51,24 @@ export function Footer() {
               <li>info@ma3loom.com</li>
               <li>الوطن العربي</li>
             </ul>
+            <div className="mt-6">
+              <h4 className="font-semibold mb-4">تابعنا</h4>
+              <div className="flex items-center gap-2" aria-label="صفحاتنا على مواقع التواصل الاجتماعي">
+                {socialLinks.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-white/80 transition-colors hover:border-white/40 hover:bg-white/10 hover:text-white"
+                  >
+                    <Icon className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
             <h4 className="font-semibold mt-6 mb-4">قانوني</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">سياسة الخصوصية</Link></li>

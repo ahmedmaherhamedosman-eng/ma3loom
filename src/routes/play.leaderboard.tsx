@@ -94,9 +94,23 @@ function Leaderboard() {
             <p className="text-muted-foreground">لا يوجد لاعبون بعد. كن أول من يصعد للقائمة!</p>
           </div>
         ) : (
-          <div className="bg-card border border-border rounded-3xl overflow-hidden">
-            {filtered.map((r, i) => {
-              const rank = i + 1;
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+              {filtered.slice(0, 3).map((r, i) => {
+                const rank = i + 1;
+                return (
+                  <div key={r.user_id} className={`bg-card border rounded-3xl p-5 text-center ${rank === 1 ? "border-yellow-400 shadow-lg sm:-translate-y-2" : "border-border"}`}>
+                    <div className="text-4xl mb-2">{rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}</div>
+                    <div className="font-bold text-foreground truncate">{r.full_name || "طالب"}</div>
+                    <div className="text-xs text-muted-foreground mt-1">المستوى {r.current_level}</div>
+                    <div className="text-xl font-black text-primary mt-3">{r.xp} XP</div>
+                  </div>
+                );
+              })}
+            </div>
+            {filtered.length > 3 && <div className="bg-card border border-border rounded-3xl overflow-hidden">
+              {filtered.slice(3).map((r, i) => {
+              const rank = i + 4;
               const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
               return (
                 <div
@@ -117,7 +131,8 @@ function Leaderboard() {
                 </div>
               );
             })}
-          </div>
+            </div>}
+          </>
         )}
       </div>
     </div>

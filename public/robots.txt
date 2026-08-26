@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /complete-profile
+Disallow: /cart
+Disallow: /payments/
+Disallow: /private-lessons/checkout
+Disallow: /private-lessons/confirm
+Disallow: /private-lessons/success
+Disallow: /my-courses
+Disallow: /profile
+
+Sitemap: https://ma3loom.vercel.app/sitemap.xml

@@ -38,7 +38,8 @@ function AdminPrivateLessonsDashboard() {
     featuresText: '',
     image_url: '',
     is_featured: false,
-    is_active: true
+    is_active: true,
+    direct_booking: false
   })
 
   useEffect(() => {
@@ -100,7 +101,8 @@ function AdminPrivateLessonsDashboard() {
       featuresText: Array.isArray(pkg.feature_list) ? pkg.feature_list.join('\n') : '',
       image_url: pkg.image_url || '',
       is_featured: pkg.is_featured || false,
-      is_active: pkg.is_active ?? true
+      is_active: pkg.is_active ?? true,
+      direct_booking: pkg.direct_booking ?? false
     })
     setIsModalOpen(true)
   }
@@ -126,7 +128,8 @@ function AdminPrivateLessonsDashboard() {
       feature_list: featuresArray,
       image_url: formData.image_url || null,
       is_featured: formData.is_featured,
-      is_active: formData.is_active
+      is_active: formData.is_active,
+      direct_booking: formData.direct_booking
     }
 
     try {
@@ -280,6 +283,7 @@ function AdminPrivateLessonsDashboard() {
                   <th className="p-4">الشعار (Badge)</th>
                   <th className="p-4">السعر</th>
                   <th className="p-4">المدة</th>
+                  <th className="p-4 text-center">طريقة الحجز</th>
                   <th className="p-4 text-center">الحالة</th>
                   <th className="p-4 text-center">الإجراءات</th>
                 </tr>
@@ -287,7 +291,7 @@ function AdminPrivateLessonsDashboard() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-medium">
                 {packages.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-slate-400">لا توجد باقات مضافة حالياً.</td>
+                    <td colSpan={7} className="p-8 text-center text-slate-400">لا توجد باقات مضافة حالياً.</td>
                   </tr>
                 ) : (
                   packages.map((pkg) => (
@@ -300,6 +304,11 @@ function AdminPrivateLessonsDashboard() {
                       </td>
                       <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{pkg.price} ر.س</td>
                       <td className="p-4 text-slate-500">{pkg.sessions_count} حصة · {pkg.duration_minutes} دقيقة</td>
+                      <td className="p-4 text-center">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${pkg.direct_booking ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-600'}`}>
+                          {pkg.direct_booking ? 'مباشر' : 'مع مراجعة'}
+                        </span>
+                      </td>
                       <td className="p-4 text-center">
                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${pkg.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
                           {pkg.is_active ? 'مُفعلة' : 'معطلة'}
@@ -511,6 +520,16 @@ function AdminPrivateLessonsDashboard() {
                     className="rounded text-blue-600"
                   />
                   <span>الباقة مفعلة</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.direct_booking}
+                    onChange={e => setFormData({...formData, direct_booking: e.target.checked})}
+                    className="rounded text-blue-600"
+                  />
+                  <span>حجز مباشر بدون مراجعة</span>
                 </label>
               </div>
 

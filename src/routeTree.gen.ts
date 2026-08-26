@@ -59,6 +59,7 @@ import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
 import { Route as BlogPostIdRouteImport } from './routes/blog.$postId'
 import { Route as AdminTeachersRouteImport } from './routes/admin/teachers'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
+import { Route as AdminSocialLinksRouteImport } from './routes/admin/social-links'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
 import { Route as AdminQuizzesRouteImport } from './routes/admin/quizzes'
 import { Route as AdminPrivateLessonsRouteImport } from './routes/admin/private-lessons'
@@ -329,6 +330,11 @@ const AdminStudentsRoute = AdminStudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSocialLinksRoute = AdminSocialLinksRouteImport.update({
+  id: '/social-links',
+  path: '/social-links',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -456,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/social-links': typeof AdminSocialLinksRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
@@ -525,6 +532,7 @@ export interface FileRoutesByTo {
   '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/social-links': typeof AdminSocialLinksRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
@@ -595,6 +603,7 @@ export interface FileRoutesById {
   '/admin/private-lessons': typeof AdminPrivateLessonsRoute
   '/admin/quizzes': typeof AdminQuizzesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/social-links': typeof AdminSocialLinksRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/teachers': typeof AdminTeachersRoute
   '/blog/$postId': typeof BlogPostIdRoute
@@ -667,6 +676,7 @@ export interface FileRouteTypes {
     | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
+    | '/admin/social-links'
     | '/admin/students'
     | '/admin/teachers'
     | '/blog/$postId'
@@ -736,6 +746,7 @@ export interface FileRouteTypes {
     | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
+    | '/admin/social-links'
     | '/admin/students'
     | '/admin/teachers'
     | '/blog/$postId'
@@ -805,6 +816,7 @@ export interface FileRouteTypes {
     | '/admin/private-lessons'
     | '/admin/quizzes'
     | '/admin/reviews'
+    | '/admin/social-links'
     | '/admin/students'
     | '/admin/teachers'
     | '/blog/$postId'
@@ -1238,6 +1250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/social-links': {
+      id: '/admin/social-links'
+      path: '/social-links'
+      fullPath: '/admin/social-links'
+      preLoaderRoute: typeof AdminSocialLinksRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reviews': {
       id: '/admin/reviews'
       path: '/reviews'
@@ -1381,6 +1400,7 @@ interface AdminRouteChildren {
   AdminPrivateLessonsRoute: typeof AdminPrivateLessonsRoute
   AdminQuizzesRoute: typeof AdminQuizzesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminSocialLinksRoute: typeof AdminSocialLinksRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminTeachersRoute: typeof AdminTeachersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1401,6 +1421,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPrivateLessonsRoute: AdminPrivateLessonsRoute,
   AdminQuizzesRoute: AdminQuizzesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
+  AdminSocialLinksRoute: AdminSocialLinksRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminTeachersRoute: AdminTeachersRoute,
   AdminIndexRoute: AdminIndexRoute,

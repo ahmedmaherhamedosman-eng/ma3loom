@@ -15,6 +15,25 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "منصة معلوم التعليمية للطلاب العرب. كورسات في العلوم والرياضيات واللغات والبرمجة لطلاب المدارس والجامعات." },
       { property: "og:title", content: "معلوم — منصة تعليمية عربية متكاملة" },
       { property: "og:description", content: "تعلّم بسهولة مع أفضل المعلمين العرب. كورسات مجانية ومدفوعة لكل المراحل." },
+      { property: "og:url", content: "https://ma3loom.vercel.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://ma3loom.vercel.app/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "EducationalOrganization",
+          name: "معلوم",
+          alternateName: "Ma3loom",
+          url: "https://ma3loom.vercel.app/",
+          logo: "https://ma3loom.vercel.app/logo.png",
+          description: "منصة تعليمية عربية تقدم الكورسات والدروس والاختبارات التفاعلية للطلاب.",
+          inLanguage: "ar",
+        }),
+      },
     ],
   }),
   component: HomePage,

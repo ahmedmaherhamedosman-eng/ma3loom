@@ -30,7 +30,7 @@ function PrivateLessonPackageDetails() {
       const [pkgRes, teachersRes] = await Promise.all([
         supabase
           .from("private_lesson_packages")
-          .select("id,name,slug,short_description,full_description,badge,icon,color_key,duration_minutes,sessions_count,includes_followup,includes_homework,includes_reports,includes_tests,includes_summaries,includes_question_bank,includes_certificate,includes_priority_booking,includes_reschedule,includes_tech_support,feature_list,old_price,price,discount_percent,is_featured,sort_order,cancellation_policy,refund_policy,seats_remaining,image_url")
+          .select("id,name,slug,short_description,full_description,badge,icon,color_key,duration_minutes,sessions_count,includes_followup,includes_homework,includes_reports,includes_tests,includes_summaries,includes_question_bank,includes_certificate,includes_priority_booking,includes_reschedule,includes_tech_support,feature_list,old_price,price,discount_percent,is_featured,sort_order,cancellation_policy,refund_policy,seats_remaining,image_url,direct_booking")
           .eq("slug", slug)
           .eq("is_active", true)
           .single(),
@@ -155,7 +155,7 @@ function PrivateLessonPackageDetails() {
               <p className="text-3xl font-extrabold text-foreground">{pkg.price} <span className="text-sm">ر.س</span></p>
             </div>
 
-            <BookingButton pkgId={pkg.id} title={pkg.name} price={pkg.price}>
+            <BookingButton pkgId={pkg.id} title={pkg.name} price={pkg.price} directBooking={pkg.direct_booking}>
               <span className={`w-full block text-center py-3.5 font-bold ${"text-white"}`}>
                 احجز الآن
               </span>

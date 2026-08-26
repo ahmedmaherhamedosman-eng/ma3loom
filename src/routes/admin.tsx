@@ -25,6 +25,7 @@ const sidebarLinks: { to: string; label: string; icon: string; exact?: boolean }
   { to: "/admin/games", label: "الألعاب التعليمية", icon: "🎮" },
   { to: "/admin/books", label: "الكتب", icon: "📚" },
   { to: "/admin/coupons", label: "الكوبونات", icon: "🎟️" },
+  { to: "/admin/social-links", label: "منصات التواصل الاجتماعي", icon: "🌐" },
 ];
 
 function AdminLayout() {

@@ -14,6 +14,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { useInstructor } from "@/hooks/useInstructor";
 import { useCart } from "@/hooks/useCart";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSocialLinks } from "@/lib/social-links";
 
 // Primary nav (always visible)
 const primaryLinks = [
@@ -26,7 +27,7 @@ const primaryLinks = [
 
 // Secondary nav (inside "المزيد" dropdown)
 const moreLinks = [
-  { to: "/play", label: "🎮 ألعاب الأطفال" },
+  { to: "/play", label: "🎮 الألعاب التعليمية" },
   { to: "/books", label: "📚 الكتب" },
   { to: "/games", label: "🕹️ ألعاب HTML" },
   { to: "/quizzes", label: "📝 اختبارات" },
@@ -45,6 +46,7 @@ export function Header() {
   const { isAdmin } = useAdmin();
   const { isInstructor } = useInstructor();
   const { count: cartCount } = useCart();
+  const socialLinks = useSocialLinks();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -118,6 +120,21 @@ export function Header() {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
+            <div className="flex items-center gap-1 border-e border-border/60 pe-3" aria-label="صفحاتنا على مواقع التواصل الاجتماعي">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  title={label}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
             <ThemeToggle />
             {user && (
               <Link to="/cart" className="relative p-2 rounded-lg hover:bg-muted transition-colors" title="سلة الشراء">
@@ -220,6 +237,21 @@ export function Header() {
             )}
             <div className="flex justify-center px-4 pt-3">
               <ThemeToggle />
+            </div>
+            <div className="flex items-center justify-center gap-2 px-4 pt-2" aria-label="صفحاتنا على مواقع التواصل الاجتماعي">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  title={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
             </div>
             <div className="flex gap-2 pt-2 px-4">
               {user ? (

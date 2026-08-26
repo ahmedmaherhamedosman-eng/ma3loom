@@ -15,7 +15,7 @@ export default function PackagesSection(){
     try{
       const { data, error } = await supabase
         .from('private_lesson_packages')
-        .select('id,name,badge,short_description,price,old_price,discount_percent,sessions_count,duration_minutes,feature_list,color_key,image_url,is_active,sort_order')
+        .select('id,name,badge,short_description,price,old_price,discount_percent,sessions_count,duration_minutes,feature_list,color_key,image_url,is_active,sort_order,direct_booking')
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
 
@@ -33,6 +33,7 @@ export default function PackagesSection(){
         features: d.feature_list ?? d.features ?? null,
         color: d.color_key ?? d.color ?? null,
         image_url: d.image_url ?? null,
+        direct_booking: d.direct_booking ?? false,
       })) : [])
     }catch(e:any){
       console.error('Failed to load packages', e)

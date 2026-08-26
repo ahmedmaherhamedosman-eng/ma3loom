@@ -30,6 +30,7 @@ export interface PrivateLessonPackage {
   refund_policy: string | null;
   seats_remaining: number | null;
   image_url: string | null;
+  direct_booking: boolean;
 }
 
 export interface PrivateLessonTeacher {

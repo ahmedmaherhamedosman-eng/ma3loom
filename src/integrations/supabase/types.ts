@@ -1631,6 +1631,7 @@ export type Database = {
           cancellation_policy: string | null
           color_key: string
           created_at: string
+          direct_booking: boolean
           discount_percent: number
           duration_minutes: number
           feature_list: string[]
@@ -1668,6 +1669,7 @@ export type Database = {
           cancellation_policy?: string | null
           color_key?: string
           created_at?: string
+          direct_booking?: boolean
           discount_percent?: number
           duration_minutes?: number
           feature_list?: string[]
@@ -1705,6 +1707,7 @@ export type Database = {
           cancellation_policy?: string | null
           color_key?: string
           created_at?: string
+          direct_booking?: boolean
           discount_percent?: number
           duration_minutes?: number
           feature_list?: string[]

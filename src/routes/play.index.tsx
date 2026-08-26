@@ -29,6 +29,7 @@ function PlayHome() {
   const [categories, setCategories] = useState<GameCategory[]>([]);
   const [featured, setFeatured] = useState<PlayGame[]>([]);
   const [newest, setNewest] = useState<PlayGame[]>([]);
+  const [firstGradeMath, setFirstGradeMath] = useState<PlayGame[]>([]);
   const [level, setLevel] = useState<GameLevel | null>(null);
   const [nextLevel, setNextLevel] = useState<GameLevel | null>(null);
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
@@ -50,6 +51,21 @@ function PlayHome() {
       setCategories(cats.data || []);
       setFeatured(feat.data || []);
       setNewest(latest.data || []);
+      const mathCategory = (cats.data || []).find((category) => category.slug === "math");
+      if (mathCategory) {
+        const { data: mathGames } = await supabase
+          .from("play_games")
+          .select("*")
+          .eq("category_id", mathCategory.id)
+          .eq("is_published", true)
+          .eq("age_min", 6)
+          .eq("age_max", 7)
+          .order("sort_order")
+          .limit(6);
+        setFirstGradeMath(mathGames || []);
+      } else {
+        setFirstGradeMath([]);
+      }
       const lvls = levels.data || [];
       const curLevelNum = isAuthed ? progress?.current_level || 1 : 1;
       setLevel(lvls.find((l) => l.level_number === curLevelNum) || lvls[0] || null);
@@ -166,6 +182,19 @@ function PlayHome() {
             ))}
           </div>
         </section>
+
+        {firstGradeMath.length > 0 && (
+          <section className="mb-10">
+            <div className="flex items-end justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">➕ رياضيات الصف الأول</h2>
+                <p className="text-sm text-muted-foreground mt-1">تدريبات قصيرة على الجمع والطرح والأعداد والأشكال</p>
+              </div>
+              <span className="shrink-0 rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">6–7 سنوات</span>
+            </div>
+            <GameGrid games={firstGradeMath} categories={categories} />
+          </section>
+        )}
 
         {/* Featured */}
         {featured.length > 0 && (
