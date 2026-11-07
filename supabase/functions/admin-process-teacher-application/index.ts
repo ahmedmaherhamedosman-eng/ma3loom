@@ -30,7 +30,7 @@ const getErrorMessage = (error: unknown) =>
 async function sendTeacherAcceptanceEmail(email: string, fullName: string) {
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
   const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || Deno.env.get("EMAIL_FROM") || "onboarding@ma3loom.com";
-  const siteUrl = Deno.env.get("SITE_URL") || "https://ma3loom-ma3loom.vercel.app";
+  const siteUrl = Deno.env.get("SITE_URL") || "https://ma3lum.vercel.app";
 
   if (!resendApiKey) {
     console.warn("RESEND_API_KEY is not configured; skipping acceptance email.");

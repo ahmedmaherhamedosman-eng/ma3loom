@@ -50,11 +50,11 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "معلوم" },
       { property: "og:locale", content: "ar_AR" },
-      { property: "og:image", content: "https://ma3loom.vercel.app/logo.png" },
+      { property: "og:image", content: "https://ma3lum.vercel.app/logo.png" },
       { name: "twitter:title", content: "معلوم — منصة تعليمية عربية متكاملة" },
       { name: "twitter:description", content: "منصة معلوم التعليمية للطلاب العرب. كورسات في العلوم والرياضيات واللغات والبرمجة." },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:image", content: "https://ma3loom-ma3loom.vercel.app/logo.png" },
+      { name: "twitter:image", content: "https://ma3lum.vercel.app/logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: indexCss },

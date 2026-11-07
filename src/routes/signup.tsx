@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SITE_URL } from "@/lib/site-url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,7 +67,7 @@ function SignupPage() {
           phone: fullPhone,
           country: country.code,
         },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: SITE_URL,
       },
     });
 
@@ -86,7 +87,7 @@ function SignupPage() {
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/login` },
+      options: { redirectTo: `${SITE_URL}/login` },
     });
 
     if (oauthError) {
